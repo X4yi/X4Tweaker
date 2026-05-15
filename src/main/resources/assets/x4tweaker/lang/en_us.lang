@@ -1,0 +1,114 @@
+# X4Tweaker English Translations
+
+# === MODULES ===
+
+x4tweaker.module.fullbright.name=Fullbright
+x4tweaker.module.fullbright.desc=Maximizes game brightness
+
+x4tweaker.module.chestesp.name=Chest ESP
+x4tweaker.module.chestesp.desc=Highlights chests through walls
+
+x4tweaker.module.playeresp.name=Player ESP
+x4tweaker.module.playeresp.desc=Highlights players through walls
+
+x4tweaker.module.activetweaks.name=Active Tweaks
+x4tweaker.module.activetweaks.desc=Shows enabled modules on screen
+
+x4tweaker.module.autosprint.name=Auto Sprint
+x4tweaker.module.autosprint.desc=Automatically sprints while moving forward
+
+x4tweaker.module.killauralegit.name=KillAura Legit
+x4tweaker.module.killauralegit.desc=Attacks nearby entities with smooth rotations
+
+x4tweaker.module.fastcrafting.name=Fast Crafting
+x4tweaker.module.fastcrafting.desc=SPACE to refill crafting grid, SHIFT+SPACE to fill max
+
+x4tweaker.module.clickgui.name=Click GUI
+x4tweaker.module.clickgui.desc=Opens the settings interface
+
+x4tweaker.module.betterafk.name=Better AFK
+x4tweaker.module.betterafk.desc=Smart AFK bot: auto-eats and fights back when hit
+
+# === SETTINGS: ActiveTweaks ===
+
+x4tweaker.setting.activetweaks.hud_position.name=HUD Position
+x4tweaker.setting.activetweaks.hud_position.desc=Where to show the active modules list
+x4tweaker.setting.activetweaks.show_title.name=Show Title
+x4tweaker.setting.activetweaks.show_title.desc=Show X4Tweaker name in the HUD
+
+# === SETTINGS: ESP (shared) ===
+
+x4tweaker.setting.chestesp.style.name=Style
+x4tweaker.setting.chestesp.style.desc=Rendering style for ESP highlights
+x4tweaker.setting.chestesp.x_ray_entity.name=X-Ray Entity
+x4tweaker.setting.chestesp.x_ray_entity.desc=See the actual entity through walls
+
+x4tweaker.setting.playeresp.style.name=Style
+x4tweaker.setting.playeresp.style.desc=Rendering style for ESP highlights
+x4tweaker.setting.playeresp.x_ray_entity.name=X-Ray Entity
+x4tweaker.setting.playeresp.x_ray_entity.desc=See the actual entity through walls
+
+# === SETTINGS: KillAuraLegit ===
+
+x4tweaker.setting.killauralegit.attack_range.name=Attack Range
+x4tweaker.setting.killauralegit.attack_range.desc=Maximum attack distance
+x4tweaker.setting.killauralegit.rotation_speed.name=Rotation Speed
+x4tweaker.setting.killauralegit.rotation_speed.desc=Camera turn speed (higher = slower)
+x4tweaker.setting.killauralegit.target_priority.name=Target Priority
+x4tweaker.setting.killauralegit.target_priority.desc=How to pick the target
+x4tweaker.setting.killauralegit.aim_precision.name=Aim Precision
+x4tweaker.setting.killauralegit.aim_precision.desc=Angle accuracy required to attack (degrees)
+x4tweaker.setting.killauralegit.fov_filter.name=FOV Filter
+x4tweaker.setting.killauralegit.fov_filter.desc=Field of view for finding targets
+x4tweaker.setting.killauralegit.skip_players.name=Skip Players
+x4tweaker.setting.killauralegit.skip_players.desc=Don't attack players
+x4tweaker.setting.killauralegit.skip_monsters.name=Skip Monsters
+x4tweaker.setting.killauralegit.skip_monsters.desc=Don't attack hostile mobs
+x4tweaker.setting.killauralegit.skip_animals.name=Skip Animals
+x4tweaker.setting.killauralegit.skip_animals.desc=Don't attack passive animals
+x4tweaker.setting.killauralegit.skip_slimes.name=Skip Slimes
+x4tweaker.setting.killauralegit.skip_slimes.desc=Don't attack slimes
+x4tweaker.setting.killauralegit.skip_pets.name=Skip Pets
+x4tweaker.setting.killauralegit.skip_pets.desc=Don't attack tamed pets
+x4tweaker.setting.killauralegit.skip_flying.name=Skip Flying
+x4tweaker.setting.killauralegit.skip_flying.desc=Don't attack flying entities
+x4tweaker.setting.killauralegit.skip_sleeping.name=Skip Sleeping
+x4tweaker.setting.killauralegit.skip_sleeping.desc=Don't attack sleeping players
+x4tweaker.setting.killauralegit.skip_enderman.name=Skip Enderman
+x4tweaker.setting.killauralegit.skip_enderman.desc=Don't attack endermen
+x4tweaker.setting.killauralegit.ignore_list.name=Ignore List
+x4tweaker.setting.killauralegit.ignore_list.desc=Entity names to skip
+
+# === SETTINGS: FastCrafting ===
+
+x4tweaker.setting.fastcrafting.click_delay.name=Click Delay
+x4tweaker.setting.fastcrafting.click_delay.desc=Ticks between each inventory click
+
+# === SETTINGS: BetterAFK ===
+
+x4tweaker.setting.betterafk.check_interval.name=Check Interval
+x4tweaker.setting.betterafk.check_interval.desc=Ticks between each bot check
+x4tweaker.setting.betterafk.auto_eat.name=Auto Eat
+x4tweaker.setting.betterafk.auto_eat.desc=Eat automatically when hungry
+x4tweaker.setting.betterafk.hunger_threshold.name=Hunger Threshold
+x4tweaker.setting.betterafk.hunger_threshold.desc=Hunger level to start eating
+x4tweaker.setting.betterafk.eat_until.name=Eat Until
+x4tweaker.setting.betterafk.eat_until.desc=Target food level to eat until reaching
+x4tweaker.setting.betterafk.auto_defend.name=Auto Defend
+x4tweaker.setting.betterafk.auto_defend.desc=Fight back automatically when hit
+x4tweaker.setting.betterafk.attack_range.name=Attack Range
+x4tweaker.setting.betterafk.attack_range.desc=Max distance to attack the aggressor
+x4tweaker.setting.betterafk.rotation_speed.name=Rotation Speed
+x4tweaker.setting.betterafk.rotation_speed.desc=Camera turn speed (higher = slower)
+x4tweaker.setting.betterafk.sprint_while_chasing.name=Sprint While Chasing
+x4tweaker.setting.betterafk.sprint_while_chasing.desc=Sprint when chasing the aggressor
+x4tweaker.setting.betterafk.jump_while_attacking.name=Jump While Attacking
+x4tweaker.setting.betterafk.jump_while_attacking.desc=Jump during combat for critical hits
+x4tweaker.setting.betterafk.strafe_in_combat.name=Strafe In Combat
+x4tweaker.setting.betterafk.strafe_in_combat.desc=Dodge sideways during combat
+x4tweaker.setting.betterafk.strafe_interval.name=Strafe Interval
+x4tweaker.setting.betterafk.strafe_interval.desc=Ticks between each strafe direction change
+x4tweaker.setting.betterafk.max_chase_distance.name=Max Chase Distance
+x4tweaker.setting.betterafk.max_chase_distance.desc=Maximum pursuit distance from AFK point
+x4tweaker.setting.betterafk.avoid_mobs_in_path.name=Avoid Mobs In Path
+x4tweaker.setting.betterafk.avoid_mobs_in_path.desc=Dodge other mobs when chasing the aggressor

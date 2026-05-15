@@ -1,0 +1,16 @@
+[
+{
+  "modid": "x4tweaker",
+  "name": "X4Tweaker",
+  "description": "A mod that adds various tweaks and improvements to Minecraft.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["x4yi"],
+  "credits": "x4yi",
+  "logoFile": "assets/x4tweaker/textures/logo.png",
+  "screenshots": [],
+  "dependencies": []
+}
+]
