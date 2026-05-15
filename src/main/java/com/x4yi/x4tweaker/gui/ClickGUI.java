@@ -18,6 +18,8 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class ClickGUI extends GuiScreen {
@@ -57,6 +59,11 @@ public class ClickGUI extends GuiScreen {
     private String inputR = "", inputG = "", inputB = "", inputA = "";
     private int activeInputIndex = -1;
 
+    private List<String> migrationNotices = new ArrayList<String>();
+    private boolean showMigrationNotice = false;
+    private int migrationScroll = 0;
+    private int migrationMaxScroll = 0;
+
     @Override
     public boolean doesGuiPauseGame() {
         return X4TweakerClient.getInstance().getThemeManager().isEnablePause() && mc.isSingleplayer();
@@ -68,6 +75,11 @@ public class ClickGUI extends GuiScreen {
         alto  = Math.max(MIN_H, Math.min(MAX_H, (int)(this.height * 0.55f)));
         x = (this.width - ancho) / 2;
         y = (this.height - alto) / 2;
+        List<String> report = X4TweakerClient.getInstance().getConfigManager().consumeMigrationReport();
+        migrationNotices = report.isEmpty() ? new ArrayList<String>() : new ArrayList<String>(report);
+        showMigrationNotice = !migrationNotices.isEmpty();
+        migrationScroll = 0;
+        migrationMaxScroll = Math.max(0, migrationNotices.size() - 5);
         Keyboard.enableRepeatEvents(true);
     }
 
@@ -210,6 +222,7 @@ public class ClickGUI extends GuiScreen {
             drawKeybindOverlay(mouseX, mouseY, tema);
         } else {
             super.drawScreen(mouseX, mouseY, partialTicks);
+            drawMigrationNotice(mouseX, mouseY);
             if (hoveredModuleTooltip != null) {
                 drawTooltip(mouseX, mouseY, hoveredModuleTooltip);
             } else if (hoveredSettingTooltip != null) {
@@ -638,6 +651,21 @@ public class ClickGUI extends GuiScreen {
     private void manejarScroll() {
         int dWheel = Mouse.getDWheel();
         if (dWheel == 0) return;
+
+        if (showMigrationNotice) {
+            int boxX1 = x + SIDEBAR_W + 6;
+            int boxY1 = y + HEADER_H + 6;
+            int boxX2 = x + ancho - 8;
+            int boxY2 = boxY1 + 78;
+            int mx = Mouse.getX() * this.width / mc.displayWidth;
+            int my = this.height - Mouse.getY() * this.height / mc.displayHeight - 1;
+            if (mx >= boxX1 && mx <= boxX2 && my >= boxY1 && my <= boxY2) {
+                if (dWheel < 0) migrationScroll = Math.min(migrationMaxScroll, migrationScroll + 1);
+                else migrationScroll = Math.max(0, migrationScroll - 1);
+                return;
+            }
+        }
+
         int maxScroll = computeMaxScroll();
         if (dWheel < 0) {
             if (isKeybindOverlayOpen) targetOverlayScrollY -= 20;
@@ -663,6 +691,19 @@ public class ClickGUI extends GuiScreen {
         }
 
         focusedSetting = null;
+
+        if (showMigrationNotice && mouseButton == 0) {
+            int boxX1 = x + SIDEBAR_W + 6;
+            int closeX1 = x + ancho - 24;
+            int closeY1 = y + HEADER_H + 10;
+            if (mouseX >= closeX1 && mouseX <= closeX1 + 12 && mouseY >= closeY1 && mouseY <= closeY1 + 12) {
+                showMigrationNotice = false;
+                return;
+            }
+            if (mouseX >= boxX1 && mouseX <= x + ancho - 8 && mouseY >= y + HEADER_H + 6 && mouseY <= y + HEADER_H + 84) {
+                return;
+            }
+        }
 
 
         if (mouseButton == 0 && mouseX >= x + ancho - 22 && mouseX <= x + ancho - 6 && mouseY >= y + 6 && mouseY <= y + 22) {
@@ -1093,5 +1134,37 @@ public class ClickGUI extends GuiScreen {
         while (normalized.startsWith("_")) normalized = normalized.substring(1);
         while (normalized.endsWith("_")) normalized = normalized.substring(0, normalized.length() - 1);
         return normalized;
+    }
+
+    private void drawMigrationNotice(int mouseX, int mouseY) {
+        if (!showMigrationNotice || migrationNotices.isEmpty()) return;
+
+        int bx1 = x + SIDEBAR_W + 6;
+        int by1 = y + HEADER_H + 6;
+        int bx2 = x + ancho - 8;
+        int by2 = by1 + 78;
+
+        RenderUtils.dibujarRect(bx1, by1, bx2, by2, 0xCC101010);
+        RenderUtils.dibujarRectBordeado(bx1, by1, bx2, by2, 1.0f, 0xFF3A9D5D, 0x00000000);
+        mc.fontRenderer.drawStringWithShadow("Config actualizada - revisa ajustes", bx1 + 6, by1 + 6, 0xFFFFFFFF);
+
+        int closeX = bx2 - 16;
+        boolean closeHover = mouseX >= closeX && mouseX <= closeX + 12 && mouseY >= by1 + 4 && mouseY <= by1 + 16;
+        mc.fontRenderer.drawStringWithShadow("x", closeX, by1 + 6, closeHover ? 0xFFFF6666 : 0xFFBBBBBB);
+
+        int maxLines = 5;
+        int baseY = by1 + 20;
+        for (int i = 0; i < maxLines; i++) {
+            int idx = i + migrationScroll;
+            if (idx >= migrationNotices.size()) break;
+            String msg = migrationNotices.get(idx);
+            if (msg.length() > 46) msg = msg.substring(0, 43) + "...";
+            mc.fontRenderer.drawStringWithShadow("- " + msg, bx1 + 8, baseY + i * 11, 0xFFD6D6D6);
+        }
+
+        if (migrationMaxScroll > 0) {
+            String footer = (migrationScroll + 1) + "/" + (migrationMaxScroll + 1);
+            mc.fontRenderer.drawStringWithShadow(footer, bx2 - mc.fontRenderer.getStringWidth(footer) - 6, by2 - 10, 0xFFAAAAAA);
+        }
     }
 }

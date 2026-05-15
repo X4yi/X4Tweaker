@@ -25,6 +25,7 @@ remove_comments.py
 changelog.txt
 gradle
 .vscode
+remove_comments.py
 .github
 scripts
 

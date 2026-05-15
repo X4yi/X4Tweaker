@@ -120,3 +120,29 @@
 - Función: abre `ClickGUI`.
 - Keybind default: `RSHIFT`.
 - También accesible via botón `[X4]` en inventario.
+
+## UTILITY
+
+### Freecam
+
+- Clase: `module.utility.Freecam`
+- Estado: Implementado
+- Función: cámara libre no clip con render opcional del jugador.
+
+### CameraDetach
+
+- Clase: `module.utility.CameraDetach`
+- Estado: Implementado
+- Función: desacopla cámara con modos de bloqueo y movimiento cinemático.
+
+### MobInfo
+
+- Clase: `module.utility.MobInfo`
+- Estado: Implementado
+- Función: etiquetas world-space tipo billboard con nombre, mod, vida y armor.
+
+### ContainerPreview
+
+- Clase: `module.utility.ContainerPreview`
+- Estado: Implementado
+- Función: preview visual no interactiva de inventarios de contenedores al apuntarlos.

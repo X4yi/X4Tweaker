@@ -1,20 +1,33 @@
 package com.x4yi.x4tweaker.manager;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.x4yi.x4tweaker.core.X4TweakerClient;
 import com.x4yi.x4tweaker.module.Module;
 import com.x4yi.x4tweaker.setting.Setting;
 import net.minecraft.client.Minecraft;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ConfigManager {
-    private static final int CONFIG_VERSION = 2;
+    private static final int CONFIG_VERSION = 3;
 
     private final File configDir;
     private final File modulesDir;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+    private final List<String> migrationReport = new ArrayList<String>();
+    private boolean pendingMigrationNotice;
 
     public ConfigManager() {
         configDir = new File(Minecraft.getMinecraft().mcDataDir, "x4tweaker");
@@ -23,16 +36,29 @@ public class ConfigManager {
     }
 
     public void init() {
-
         File legacyFile = new File(configDir, "modules.json");
         if (legacyFile.exists()) {
             System.out.println("[X4Tweaker] Encontrado modules.json antiguo, migrando a configuración modular...");
             loadLegacy(legacyFile);
             legacyFile.renameTo(new File(configDir, "modules.json.old"));
+            migrationReport.add("Config legacy detectada: modules.json -> modular");
+            pendingMigrationNotice = true;
             save();
-        } else {
-            load();
+            return;
         }
+        load();
+    }
+
+    public boolean hasPendingMigrationNotice() {
+        return pendingMigrationNotice && !migrationReport.isEmpty();
+    }
+
+    public List<String> consumeMigrationReport() {
+        if (!hasPendingMigrationNotice()) return Collections.emptyList();
+        List<String> copy = new ArrayList<String>(migrationReport);
+        migrationReport.clear();
+        pendingMigrationNotice = false;
+        return copy;
     }
 
     private void loadLegacy(File file) {
@@ -99,7 +125,10 @@ public class ConfigManager {
 
     public void load() {
         if (!modulesDir.exists()) return;
+
+        boolean rewriteRequired = false;
         List<Module> modules = X4TweakerClient.getInstance().getModuleManager().getModules();
+
         for (int i = 0, size = modules.size(); i < size; i++) {
             Module module = modules.get(i);
             File moduleFile = new File(modulesDir, module.getName() + ".json");
@@ -107,17 +136,84 @@ public class ConfigManager {
 
             try (FileReader reader = new FileReader(moduleFile)) {
                 JsonObject json = new JsonParser().parse(reader).getAsJsonObject();
+                int version = json.has("configVersion") ? json.get("configVersion").getAsInt() : 1;
+                boolean outdated = version < CONFIG_VERSION;
+
+                JsonObject settingsJson = json.has("settings") && json.get("settings").isJsonObject()
+                    ? json.getAsJsonObject("settings")
+                    : new JsonObject();
+
+                if (outdated) {
+                    backupConfig(moduleFile, version);
+                    applyMigrations(module.getName(), version, settingsJson);
+                    migrationReport.add(module.getName() + " migrado v" + version + " -> v" + CONFIG_VERSION);
+                    rewriteRequired = true;
+                }
+
                 if (json.has("enabled")) module.setEnabled(json.get("enabled").getAsBoolean());
                 if (json.has("keybind")) module.setKeybind(json.get("keybind").getAsInt());
-                if (json.has("settings")) {
-                    JsonObject settingsJson = json.getAsJsonObject("settings");
-                    for (Setting<?> s : module.getSettings()) {
-                        s.loadFromJson(settingsJson);
-                    }
+
+                for (Setting<?> s : module.getSettings()) {
+                    s.loadFromJson(settingsJson);
                 }
             } catch (Exception e) {
                 System.err.println("[X4Tweaker] Error cargando config " + module.getName() + ": " + e.getMessage());
             }
         }
+
+        if (rewriteRequired) {
+            pendingMigrationNotice = true;
+            save();
+        }
+    }
+
+    private void backupConfig(File moduleFile, int oldVersion) {
+        try {
+            String name = moduleFile.getName();
+            int dot = name.lastIndexOf('.');
+            String base = dot > 0 ? name.substring(0, dot) : name;
+            File backup = new File(modulesDir, base + ".v" + oldVersion + ".bak");
+            if (!backup.exists()) {
+                Files.copy(moduleFile.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (Exception e) {
+            System.err.println("[X4Tweaker] Error creando backup de config: " + e.getMessage());
+        }
+    }
+
+    private void applyMigrations(String moduleName, int fromVersion, JsonObject settings) {
+        if ("MobESP".equalsIgnoreCase(moduleName)) {
+            migrateMobEspSettings(settings);
+        }
+
+        if (fromVersion < 3) {
+            if (settings.has("Eat Duration") && !settings.has("Eat Until")) {
+                settings.add("Eat Until", settings.get("Eat Duration"));
+                migrationReport.add("BetterAFK: Eat Duration -> Eat Until");
+            }
+        }
+    }
+
+    private void migrateMobEspSettings(JsonObject settings) {
+        invertSetting(settings, "Hostiles", "Ignore Hostiles");
+        invertSetting(settings, "Animals", "Ignore Animals");
+        invertSetting(settings, "Villagers", "Ignore Villagers");
+        invertSetting(settings, "Slimes", "Ignore Slimes");
+        invertSetting(settings, "Flying", "Ignore Flying");
+        invertSetting(settings, "Pets", "Ignore Pets");
+        invertSetting(settings, "Invisible", "Ignore Invisible");
+        invertSetting(settings, "Armor Stands", "Ignore Armor Stands");
+        invertSetting(settings, "Players", "Ignore Players");
+    }
+
+    private void invertSetting(JsonObject settings, String oldKey, String newKey) {
+        if (settings.has(newKey)) return;
+        if (!settings.has(oldKey)) return;
+
+        try {
+            boolean include = settings.get(oldKey).getAsBoolean();
+            settings.addProperty(newKey, !include);
+            migrationReport.add("MobESP: " + oldKey + " -> " + newKey);
+        } catch (Exception ignored) {}
     }
 }

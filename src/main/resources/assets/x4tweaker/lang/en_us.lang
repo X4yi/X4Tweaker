@@ -10,6 +10,8 @@ x4tweaker.module.chestesp.desc=Highlights chests through walls
 
 x4tweaker.module.playeresp.name=Player ESP
 x4tweaker.module.playeresp.desc=Highlights players through walls
+x4tweaker.module.mobesp.name=Mob ESP
+x4tweaker.module.mobesp.desc=Highlights nearby mobs/entities with filters
 
 x4tweaker.module.activetweaks.name=Active Tweaks
 x4tweaker.module.activetweaks.desc=Shows enabled modules on screen
@@ -28,6 +30,33 @@ x4tweaker.module.clickgui.desc=Opens the settings interface
 
 x4tweaker.module.betterafk.name=Better AFK
 x4tweaker.module.betterafk.desc=Smart AFK bot: auto-eats and fights back when hit
+x4tweaker.module.mobinfo.name=Mob Info
+x4tweaker.module.mobinfo.desc=Floating world-space entity info labels
+x4tweaker.module.containerpreview.name=Container Preview
+x4tweaker.module.containerpreview.desc=Visual container preview near crosshair
+
+x4tweaker.setting.mobesp.max_distance.name=Max Distance
+x4tweaker.setting.mobesp.max_distance.desc=Maximum distance to render mob ESP
+x4tweaker.setting.mobesp.ignore_hostiles.name=Ignore Hostiles
+x4tweaker.setting.mobesp.ignore_hostiles.desc=Hide hostile mobs from ESP
+x4tweaker.setting.mobesp.ignore_animals.name=Ignore Animals
+x4tweaker.setting.mobesp.ignore_animals.desc=Hide passive animals from ESP
+x4tweaker.setting.mobesp.ignore_villagers.name=Ignore Villagers
+x4tweaker.setting.mobesp.ignore_villagers.desc=Hide villagers from ESP
+x4tweaker.setting.mobesp.ignore_slimes.name=Ignore Slimes
+x4tweaker.setting.mobesp.ignore_slimes.desc=Hide slimes from ESP
+x4tweaker.setting.mobesp.ignore_flying.name=Ignore Flying
+x4tweaker.setting.mobesp.ignore_flying.desc=Hide flying mobs from ESP
+x4tweaker.setting.mobesp.ignore_pets.name=Ignore Pets
+x4tweaker.setting.mobesp.ignore_pets.desc=Hide tamed pets from ESP
+x4tweaker.setting.mobesp.ignore_invisible.name=Ignore Invisible
+x4tweaker.setting.mobesp.ignore_invisible.desc=Hide invisible entities from ESP
+x4tweaker.setting.mobesp.ignore_armor_stands.name=Ignore Armor Stands
+x4tweaker.setting.mobesp.ignore_armor_stands.desc=Hide armor stands from ESP
+x4tweaker.setting.mobesp.ignore_players.name=Ignore Players
+x4tweaker.setting.mobesp.ignore_players.desc=Hide players from ESP
+x4tweaker.setting.mobesp.ignore_list.name=Ignore List
+x4tweaker.setting.mobesp.ignore_list.desc=Entity names or IDs to skip
 
 # === SETTINGS: ActiveTweaks ===
 

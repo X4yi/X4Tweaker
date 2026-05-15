@@ -80,12 +80,12 @@ public class RaytraceUtil {
             }
         }
 
-        if (mc.pointedEntity != null && flag && vec3d.distanceTo(vec3d3) > 3.0D) {
+        if (mc.pointedEntity != null && vec3d3 != null && flag && vec3d.distanceTo(vec3d3) > 3.0D) {
             mc.pointedEntity = null;
             mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, vec3d3, (EnumFacing)null, new BlockPos(vec3d3));
         }
 
-        if (mc.pointedEntity != null && (d2 < d1 || mc.objectMouseOver == null)) {
+        if (mc.pointedEntity != null && vec3d3 != null && (d2 < d1 || mc.objectMouseOver == null)) {
             mc.objectMouseOver = new RayTraceResult(mc.pointedEntity, vec3d3);
         }
     }

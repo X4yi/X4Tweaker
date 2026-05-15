@@ -6,11 +6,11 @@ import com.x4yi.x4tweaker.setting.ModeSetting;
 import com.x4yi.x4tweaker.setting.NumberSetting;
 import com.x4yi.x4tweaker.utils.camera.FakeCameraEntity;
 import com.x4yi.x4tweaker.utils.camera.RaytraceUtil;
+import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
-
-import java.util.Arrays;
 
 public class CameraDetach extends Module {
 
@@ -61,6 +61,7 @@ public class CameraDetach extends Module {
         if (mc.world != null) {
             mc.world.removeEntityFromWorld(ENTITY_ID);
         }
+        RaytraceUtil.updateMouseOver(mc.getRenderPartialTicks());
         fakeEntity = null;
     }
 
@@ -141,6 +142,10 @@ public class CameraDetach extends Module {
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.START && fakeEntity != null) {
+            RaytraceUtil.updateMouseOver(1.0F);
+        }
+
         if (event.phase == TickEvent.Phase.END && fakeEntity != null && mc.player != null) {
 
 
@@ -174,6 +179,20 @@ public class CameraDetach extends Module {
                 }
             }
             RaytraceUtil.updateMouseOver(event.renderTickTime);
+        }
+    }
+
+    @SubscribeEvent
+    public void onMouseInput(MouseEvent event) {
+        if (fakeEntity != null) {
+            RaytraceUtil.updateMouseOver(mc.getRenderPartialTicks());
+        }
+    }
+
+    @SubscribeEvent
+    public void onRenderHand(RenderHandEvent event) {
+        if (fakeEntity != null) {
+            event.setCanceled(true);
         }
     }
 

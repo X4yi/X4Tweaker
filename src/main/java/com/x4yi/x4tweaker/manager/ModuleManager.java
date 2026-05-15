@@ -10,6 +10,8 @@ import com.x4yi.x4tweaker.module.tweaks.AutoSprint;
 import com.x4yi.x4tweaker.module.visuals.*;
 import com.x4yi.x4tweaker.module.utility.Freecam;
 import com.x4yi.x4tweaker.module.utility.CameraDetach;
+import com.x4yi.x4tweaker.module.utility.MobInfo;
+import com.x4yi.x4tweaker.module.utility.ContainerPreview;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +26,7 @@ public class ModuleManager {
             new Fullbright(),
             new ChestESP(),
             new PlayerESP(),
+            new MobESP(),
             new ActiveTweaks(),
             new AutoSprint(),
             new KillAuraLegit(),
@@ -31,7 +34,9 @@ public class ModuleManager {
             new ClickGUIModule(),
             new BetterAFK(),
             new Freecam(),
-            new CameraDetach()
+            new CameraDetach(),
+            new MobInfo(),
+            new ContainerPreview()
         );
     }
 

@@ -9,6 +9,7 @@ import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityFlying;
 import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.IAnimals;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.Vec3d;
@@ -111,7 +112,7 @@ public class TargetSelector {
             if (PROTECTED_UUID.equals(ep.getGameProfile().getId())) return false;
         }
         if (ignorePlayersFlag && entity instanceof EntityPlayer) return false;
-        if (ignoreVillagerFlag && entity instanceof EntityVillager) return false;
+        if (ignoreVillagersFlag && entity instanceof EntityVillager) return false;
         if (ignoreMonstersFlag && entity instanceof IMob) return false;
         if (ignoreSlimesFlag && entity instanceof EntitySlime) return false;
         if (ignoreAnimalsFlag && entity instanceof IAnimals && !(entity instanceof IMob)) return false;
@@ -141,6 +142,7 @@ public class TargetSelector {
         private double maxAngle = 180.0;
         private PriorityMode priorityMode = PriorityMode.DISTANCE;
         private boolean ignorePlayersFlag = false;
+        private boolean ignoreVillagersFlag = false;
         private boolean ignoreMonstersFlag = false;
         private boolean ignoreAnimalsFlag = false;
         private boolean ignoreSlimesFlag = false;
@@ -154,6 +156,7 @@ public class TargetSelector {
         public Builder maxAngle(double angle) { this.maxAngle = angle; return this; }
         public Builder priorityMode(PriorityMode mode) { this.priorityMode = mode; return this; }
         public Builder ignorePlayers(boolean ignore) { this.ignorePlayersFlag = ignore; return this; }
+        public Builder ignoreVillagers(boolean ignore) { this.ignoreVillagersFlag = ignore; return this; }
         public Builder ignoreMonsters(boolean ignore) { this.ignoreMonstersFlag = ignore; return this; }
         public Builder ignoreAnimals(boolean ignore) { this.ignoreAnimalsFlag = ignore; return this; }
         public Builder ignoreSlimes(boolean ignore) { this.ignoreSlimesFlag = ignore; return this; }

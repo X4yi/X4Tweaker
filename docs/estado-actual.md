@@ -50,7 +50,7 @@
 - Tooltips de módulos por `.lang` con fallback.
 - Botón `[X4]` inyectado en `GuiInventory`.
 
-### Módulos (9 totales)
+### Módulos (13 totales)
 
 - `Fullbright`: implementado.
 - `PlayerESP`: implementado.
@@ -63,6 +63,8 @@
 - `BetterAFK`: implementado (13 settings, máquina de estados, movimiento inteligente, multi-target).
 - `Freecam`: implementado (Vuelo libre con bypass de render nativo).
 - `CameraDetach`: implementado (Cinematic Drone, bypass de paquetes servidor).
+- `MobInfo`: implementado (Billboard world-space de info de entidades con fade/distancia).
+- `ContainerPreview`: implementado (Preview no interactiva de contenedores con cache/throttle).
 
 ### Incompatibilidades activas
 
