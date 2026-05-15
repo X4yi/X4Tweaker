@@ -23,7 +23,7 @@ public class HUDOverlay extends Gui {
     public void onRenderGameOverlay(RenderGameOverlayEvent.Post event) {
         if (event.getType() != RenderGameOverlayEvent.ElementType.TEXT) return;
 
-        mc.fontRenderer.drawStringWithShadow(X4Tweaker.NAME + " v" + X4Tweaker.VERSION, 2, 2, 0xFF00FF00);
+        mc.fontRenderer.drawStringWithShadow(X4Tweaker.NAME + " " + X4Tweaker.VERSION, 2, 2, 0xFF00FF00);
 
         mc.fontRenderer.drawStringWithShadow("FPS: " + Minecraft.getDebugFPS(), 2, 12, 0xFFFFFFFF);
         if (mc.player != null) {

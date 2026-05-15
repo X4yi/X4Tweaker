@@ -11,6 +11,12 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class Module {
+    public enum ReleaseState {
+        STABLE,
+        EXPERIMENTAL,
+        COMING_SOON
+    }
+
     private final String name;
     private final String description;
     private final Category category;
@@ -18,7 +24,7 @@ public abstract class Module {
     private boolean enabled;
     private boolean visible    = true;
     private boolean expanded   = false;
-    private boolean implemented = true;
+    private ReleaseState releaseState = ReleaseState.STABLE;
     private int keybind        = Keyboard.KEY_NONE;
     private float expandProgress = 0.0f;
 
@@ -42,6 +48,7 @@ public abstract class Module {
     }
 
     public void enable() {
+        if (!isImplemented()) return;
         if (enabled) return;
         try {
             enabled = true;
@@ -91,8 +98,14 @@ public abstract class Module {
     public void setVisible(boolean v)       { visible = v; }
     public boolean isExpanded()             { return expanded; }
     public void setExpanded(boolean v)      { expanded = v; }
-    public boolean isImplemented()          { return implemented; }
-    public void setImplemented(boolean v)   { implemented = v; }
+    public boolean isImplemented()          { return releaseState != ReleaseState.COMING_SOON; }
+    public void setImplemented(boolean v)   { releaseState = v ? ReleaseState.STABLE : ReleaseState.COMING_SOON; }
+    public ReleaseState getReleaseState()   { return releaseState; }
+    public void setReleaseState(ReleaseState state) {
+        if (state != null) {
+            releaseState = state;
+        }
+    }
     public int  getKeybind()                { return keybind; }
     public void setKeybind(int k)           { keybind = k; }
     public float getExpandProgress()        { return expandProgress; }

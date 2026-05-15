@@ -23,7 +23,7 @@ x4tweaker.module.killauralegit.name=KillAura Legit
 x4tweaker.module.killauralegit.desc=Attacks nearby entities with smooth rotations
 
 x4tweaker.module.fastcrafting.name=Fast Crafting
-x4tweaker.module.fastcrafting.desc=SPACE to refill crafting grid, SHIFT+SPACE to fill max
+x4tweaker.module.fastcrafting.desc=Instantly refills and crafts using detected recipe
 
 x4tweaker.module.clickgui.name=Click GUI
 x4tweaker.module.clickgui.desc=Opens the settings interface
@@ -33,7 +33,7 @@ x4tweaker.module.betterafk.desc=Smart AFK bot: auto-eats and fights back when hi
 x4tweaker.module.mobinfo.name=Mob Info
 x4tweaker.module.mobinfo.desc=Floating world-space entity info labels
 x4tweaker.module.containerpreview.name=Container Preview
-x4tweaker.module.containerpreview.desc=Visual container preview near crosshair
+x4tweaker.module.containerpreview.desc=Automatic container preview when aiming at blocks
 
 x4tweaker.setting.mobesp.max_distance.name=Max Distance
 x4tweaker.setting.mobesp.max_distance.desc=Maximum distance to render mob ESP
@@ -112,6 +112,8 @@ x4tweaker.setting.killauralegit.ignore_list.desc=Entity names to skip
 
 x4tweaker.setting.fastcrafting.click_delay.name=Click Delay
 x4tweaker.setting.fastcrafting.click_delay.desc=Ticks between each inventory click
+x4tweaker.setting.fastcrafting.trigger_key.name=Trigger Key
+x4tweaker.setting.fastcrafting.trigger_key.desc=Key used to trigger instant crafting
 
 # === SETTINGS: BetterAFK ===
 

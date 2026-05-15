@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.x4yi.x4tweaker.X4Tweaker;
 import com.x4yi.x4tweaker.core.X4TweakerClient;
 import com.x4yi.x4tweaker.module.Module;
 import com.x4yi.x4tweaker.setting.Setting;
@@ -20,7 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class ConfigManager {
-    private static final int CONFIG_VERSION = 3;
+    private static final int LEGACY_CONFIG_VERSION = 4;
+    private static final String BUILD_VERSION = X4Tweaker.VERSION;
 
     private final File configDir;
     private final File modulesDir;
@@ -96,7 +98,7 @@ public class ConfigManager {
 
             try {
                 JsonObject json = new JsonObject();
-                json.addProperty("configVersion", CONFIG_VERSION);
+                json.addProperty("buildVersion", BUILD_VERSION);
                 json.addProperty("enabled", module.isEnabled());
                 json.addProperty("keybind", module.getKeybind());
 
@@ -136,17 +138,20 @@ public class ConfigManager {
 
             try (FileReader reader = new FileReader(moduleFile)) {
                 JsonObject json = new JsonParser().parse(reader).getAsJsonObject();
-                int version = json.has("configVersion") ? json.get("configVersion").getAsInt() : 1;
-                boolean outdated = version < CONFIG_VERSION;
+                String fileBuildVersion = json.has("buildVersion") ? json.get("buildVersion").getAsString() : null;
+                int legacyVersion = json.has("configVersion") ? json.get("configVersion").getAsInt() : 1;
+                int fromIndex = resolveMigrationIndex(fileBuildVersion, legacyVersion);
+                int currentIndex = resolveMigrationIndex(BUILD_VERSION, LEGACY_CONFIG_VERSION);
+                boolean outdated = fromIndex < currentIndex;
 
                 JsonObject settingsJson = json.has("settings") && json.get("settings").isJsonObject()
                     ? json.getAsJsonObject("settings")
                     : new JsonObject();
 
                 if (outdated) {
-                    backupConfig(moduleFile, version);
-                    applyMigrations(module.getName(), version, settingsJson);
-                    migrationReport.add(module.getName() + " migrado v" + version + " -> v" + CONFIG_VERSION);
+                    backupConfig(moduleFile, fileBuildVersion != null ? fileBuildVersion : ("v" + legacyVersion));
+                    applyMigrations(module.getName(), fromIndex, settingsJson);
+                    migrationReport.add(module.getName() + " migrado " + (fileBuildVersion != null ? fileBuildVersion : ("v" + legacyVersion)) + " -> " + BUILD_VERSION);
                     rewriteRequired = true;
                 }
 
@@ -167,12 +172,13 @@ public class ConfigManager {
         }
     }
 
-    private void backupConfig(File moduleFile, int oldVersion) {
+    private void backupConfig(File moduleFile, String oldVersion) {
         try {
             String name = moduleFile.getName();
             int dot = name.lastIndexOf('.');
             String base = dot > 0 ? name.substring(0, dot) : name;
-            File backup = new File(modulesDir, base + ".v" + oldVersion + ".bak");
+            String sanitized = oldVersion == null ? "legacy" : oldVersion.replaceAll("[^a-zA-Z0-9._-]", "_");
+            File backup = new File(modulesDir, base + "." + sanitized + ".bak");
             if (!backup.exists()) {
                 Files.copy(moduleFile.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
@@ -192,6 +198,20 @@ public class ConfigManager {
                 migrationReport.add("BetterAFK: Eat Duration -> Eat Until");
             }
         }
+
+        if (fromVersion < 4 && "ContainerPreview".equalsIgnoreCase(moduleName)) {
+            migrateContainerPreviewTiming(settings);
+        }
+    }
+
+    private int resolveMigrationIndex(String buildVersion, int legacyVersion) {
+        if (buildVersion == null || buildVersion.trim().isEmpty()) {
+            return legacyVersion;
+        }
+        if ("r1.0".equalsIgnoreCase(buildVersion)) {
+            return 4;
+        }
+        return 4;
     }
 
     private void migrateMobEspSettings(JsonObject settings) {
@@ -214,6 +234,23 @@ public class ConfigManager {
             boolean include = settings.get(oldKey).getAsBoolean();
             settings.addProperty(newKey, !include);
             migrationReport.add("MobESP: " + oldKey + " -> " + newKey);
+        } catch (Exception ignored) {}
+    }
+
+    private void migrateContainerPreviewTiming(JsonObject settings) {
+        migrateMsToTicksSetting(settings, "Show Delay", 40);
+        migrateMsToTicksSetting(settings, "Refresh Rate", 40);
+    }
+
+    private void migrateMsToTicksSetting(JsonObject settings, String key, int clampMax) {
+        if (!settings.has(key)) return;
+        try {
+            double current = settings.get(key).getAsDouble();
+            if (current > clampMax) {
+                int ticks = (int) Math.max(0, Math.min(clampMax, Math.round(current / 50.0)));
+                settings.addProperty(key, ticks);
+                migrationReport.add("ContainerPreview: " + key + " ms -> ticks");
+            }
         } catch (Exception ignored) {}
     }
 }

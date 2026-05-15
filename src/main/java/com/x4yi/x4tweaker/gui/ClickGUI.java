@@ -1,9 +1,11 @@
 package com.x4yi.x4tweaker.gui;
 
 import com.x4yi.x4tweaker.core.X4TweakerClient;
+import com.x4yi.x4tweaker.gui.changelog.ChangelogScreen;
 import com.x4yi.x4tweaker.manager.ThemeManager;
 import com.x4yi.x4tweaker.module.Category;
 import com.x4yi.x4tweaker.module.Module;
+import com.x4yi.x4tweaker.module.client.ClickGUIModule;
 import com.x4yi.x4tweaker.setting.BooleanSetting;
 import com.x4yi.x4tweaker.setting.NumberSetting;
 import com.x4yi.x4tweaker.setting.ModeSetting;
@@ -64,6 +66,8 @@ public class ClickGUI extends GuiScreen {
     private int migrationScroll = 0;
     private int migrationMaxScroll = 0;
 
+    private int changelogBtnX1, changelogBtnY1, changelogBtnX2, changelogBtnY2;
+
     @Override
     public boolean doesGuiPauseGame() {
         return X4TweakerClient.getInstance().getThemeManager().isEnablePause() && mc.isSingleplayer();
@@ -80,6 +84,10 @@ public class ClickGUI extends GuiScreen {
         showMigrationNotice = !migrationNotices.isEmpty();
         migrationScroll = 0;
         migrationMaxScroll = Math.max(0, migrationNotices.size() - 5);
+        changelogBtnX1 = x + ancho - 170;
+        changelogBtnX2 = x + ancho - 86;
+        changelogBtnY1 = y + 7;
+        changelogBtnY2 = y + 21;
         Keyboard.enableRepeatEvents(true);
     }
 
@@ -108,6 +116,7 @@ public class ClickGUI extends GuiScreen {
             if (categoriaSeleccionada == Category.KEYBINDS) {
                 total += 25;
                 for (Module m : X4TweakerClient.getInstance().getModuleManager().getModules()) {
+                    if (isHiddenInModuleUX(m)) continue;
                     if (m.getKeybind() != Keyboard.KEY_NONE) total += 20;
                 }
             } else {
@@ -123,6 +132,7 @@ public class ClickGUI extends GuiScreen {
         }
         int total = 0;
         for (Module m : X4TweakerClient.getInstance().getModuleManager().getModulesByCategory(categoriaSeleccionada)) {
+            if (isHiddenInModuleUX(m)) continue;
             total += MOD_H + 2;
             if (m.isExpanded() && m.isImplemented()) {
                 total += (int)(getExpandedHeight(m) * m.getExpandProgress()) + 4;
@@ -141,6 +151,7 @@ public class ClickGUI extends GuiScreen {
 
         for (Category cat : Category.values()) {
             for (Module m : X4TweakerClient.getInstance().getModuleManager().getModulesByCategory(cat)) {
+                if (isHiddenInModuleUX(m)) continue;
                 float target = m.isExpanded() ? 1.0f : 0.0f;
                 float cur = m.getExpandProgress();
                 if (Math.abs(cur - target) > 0.001f) {
@@ -162,9 +173,13 @@ public class ClickGUI extends GuiScreen {
         RenderUtils.dibujarRectGradienteHorizontal(x, y, x + ancho, y + HEADER_H, tema.getColorBotonOscuro().getRGB(), tema.getColorBotonNormal().getRGB());
         mc.fontRenderer.drawStringWithShadow("X4Tweaker", x + 10, y + 10, 0xFFFFFFFF);
 
-        String ver = "v1.2.2";
+        String ver = "r1.0";
         int verW = mc.fontRenderer.getStringWidth(ver);
         mc.fontRenderer.drawStringWithShadow(ver, x + (ancho - verW) / 2, y + 10, 0x88AAAAAA);
+
+        boolean changelogHover = mouseX >= changelogBtnX1 && mouseX <= changelogBtnX2 && mouseY >= changelogBtnY1 && mouseY <= changelogBtnY2;
+        RenderUtils.dibujarRect(changelogBtnX1, changelogBtnY1, changelogBtnX2, changelogBtnY2, changelogHover ? 0x44FFFFFF : 0x22000000);
+        mc.fontRenderer.drawStringWithShadow("Changelog", changelogBtnX1 + 6, changelogBtnY1 + 4, 0xFFFFFFFF);
 
 
         boolean closeHover = mouseX >= x + ancho - 22 && mouseX <= x + ancho - 6 && mouseY >= y + 6 && mouseY <= y + 22;
@@ -232,22 +247,30 @@ public class ClickGUI extends GuiScreen {
     }
 
     private void drawTooltip(int mouseX, int mouseY, Module m) {
-        String moduleKey = normalizeKey(m.getName());
-        String descKey = "x4tweaker.module." + moduleKey + ".desc";
-        String tooltip = I18n.hasKey(descKey) ? I18n.format(descKey) : m.getDescription();
-        if (!m.isImplemented()) tooltip = "Coming Soon...";
+        List<String> lines = buildModuleTooltipLines(m);
+        if (lines.isEmpty()) return;
 
-        int textWidth = mc.fontRenderer.getStringWidth(tooltip);
+        int maxWidth = 0;
+        for (int i = 0; i < lines.size(); i++) {
+            int w = mc.fontRenderer.getStringWidth(lines.get(i));
+            if (w > maxWidth) maxWidth = w;
+        }
+
+        int boxW = maxWidth + 8;
+        int boxH = lines.size() * 10 + 6;
         int tx = mouseX + 10;
         int ty = mouseY + 10;
 
-        if (tx + textWidth + 8 > this.width) tx = this.width - textWidth - 8;
-        if (ty + 16 > this.height) ty = this.height - 16;
+        if (tx + boxW > this.width) tx = this.width - boxW;
+        if (ty + boxH > this.height) ty = this.height - boxH;
         if (tx < 0) tx = 0;
         if (ty < 0) ty = 0;
 
-        RenderUtils.dibujarRectBordeado(tx, ty, tx + textWidth + 8, ty + 14, 1.0f, 0xFF000000, 0xDD000000);
-        mc.fontRenderer.drawStringWithShadow(tooltip, tx + 4, ty + 3, !m.isImplemented() ? 0xFFFF5555 : 0xFFFFFFFF);
+        RenderUtils.dibujarRectBordeado(tx, ty, tx + boxW, ty + boxH, 1.0f, 0xFF000000, 0xDD000000);
+        for (int i = 0; i < lines.size(); i++) {
+            int color = i == 0 ? getModuleStatusColor(m) : 0xFFFFFFFF;
+            mc.fontRenderer.drawStringWithShadow(lines.get(i), tx + 4, ty + 3 + (i * 10), color);
+        }
     }
 
     private void drawSettingTooltip(int mouseX, int mouseY, Setting<?> s) {
@@ -279,6 +302,7 @@ public class ClickGUI extends GuiScreen {
         GL11.glScissor((x + SIDEBAR_W + 1) * scale, mc.displayHeight - (y + alto) * scale, (ancho - SIDEBAR_W - 1) * scale, (alto - HEADER_H) * scale);
 
         for (Module m : X4TweakerClient.getInstance().getModuleManager().getModulesByCategory(categoriaSeleccionada)) {
+            if (isHiddenInModuleUX(m)) continue;
             float ep = m.getExpandProgress();
             int expH = m.isImplemented() ? getExpandedHeight(m) : 0;
             int animH = (int)(expH * ep);
@@ -305,7 +329,13 @@ public class ClickGUI extends GuiScreen {
             }
 
 
-            mc.fontRenderer.drawStringWithShadow(getModuleDisplayName(m), modX + 14, modY + 7, !m.isImplemented() ? 0xFF666666 : 0xFFEEEEEE);
+            int moduleColor = !m.isImplemented() ? 0xFF666666 : (m.getReleaseState() == Module.ReleaseState.EXPERIMENTAL ? 0xFFFFD27F : 0xFFEEEEEE);
+            mc.fontRenderer.drawStringWithShadow(getModuleDisplayName(m), modX + 14, modY + 7, moduleColor);
+            String badge = getModuleStatusBadge(m);
+            if (!badge.isEmpty()) {
+                int bw = mc.fontRenderer.getStringWidth(badge);
+                mc.fontRenderer.drawStringWithShadow(badge, panelRight - bw - 40, modY + 7, getModuleStatusColor(m));
+            }
 
 
             if (m.isImplemented()) {
@@ -467,6 +497,7 @@ public class ClickGUI extends GuiScreen {
 
         int listY = btnY + 25;
         for (Module m : X4TweakerClient.getInstance().getModuleManager().getModules()) {
+            if (isHiddenInModuleUX(m)) continue;
             if (m.getKeybind() == Keyboard.KEY_NONE) continue;
             RenderUtils.dibujarRect(modX, listY, panelRight, listY + 18, 0x22000000);
             mc.fontRenderer.drawStringWithShadow(getModuleDisplayName(m), modX + 5, listY + 5, 0xFFFFFFFF);
@@ -511,6 +542,7 @@ public class ClickGUI extends GuiScreen {
 
         int itemY = listTop + (int)overlayScrollY;
         for (Module m : X4TweakerClient.getInstance().getModuleManager().getModules()) {
+            if (isHiddenInModuleUX(m)) continue;
             if (itemY + 14 > listTop && itemY < listBot) {
                 boolean isSelected = bindingModule == m;
                 boolean itemHover = mouseX >= ox + 5 && mouseX <= ox + ow - 5 && mouseY >= itemY && mouseY <= itemY + 14;
@@ -705,6 +737,11 @@ public class ClickGUI extends GuiScreen {
             }
         }
 
+        if (mouseButton == 0 && mouseX >= changelogBtnX1 && mouseX <= changelogBtnX2 && mouseY >= changelogBtnY1 && mouseY <= changelogBtnY2) {
+            mc.displayGuiScreen(new ChangelogScreen(this));
+            return;
+        }
+
 
         if (mouseButton == 0 && mouseX >= x + ancho - 22 && mouseX <= x + ancho - 6 && mouseY >= y + 6 && mouseY <= y + 22) {
             mc.displayGuiScreen(null);
@@ -758,6 +795,7 @@ public class ClickGUI extends GuiScreen {
         int listBot = oy + oh - 30;
         int itemY = listTop + (int)overlayScrollY;
         for (Module m : X4TweakerClient.getInstance().getModuleManager().getModules()) {
+            if (isHiddenInModuleUX(m)) continue;
             if (itemY + 14 > listTop && itemY < listBot) {
                 if (mouseX >= ox + 5 && mouseX <= ox + ow - 5 && mouseY >= itemY && mouseY <= itemY + 14) {
                     bindingModule = m;
@@ -797,6 +835,7 @@ public class ClickGUI extends GuiScreen {
 
         int listY = btnY + 25;
         for (Module m : X4TweakerClient.getInstance().getModuleManager().getModules()) {
+            if (isHiddenInModuleUX(m)) continue;
             if (m.getKeybind() == Keyboard.KEY_NONE) continue;
             if (mouseX >= panelRight - 20 && mouseX <= panelRight - 5 && mouseY >= listY + 4 && mouseY <= listY + 14) {
                 if (m.getName().equalsIgnoreCase("ClickGUI")) return;
@@ -816,6 +855,7 @@ public class ClickGUI extends GuiScreen {
         int vpBot = y + alto - 4;
 
         for (Module m : X4TweakerClient.getInstance().getModuleManager().getModulesByCategory(categoriaSeleccionada)) {
+            if (isHiddenInModuleUX(m)) continue;
             float ep = m.getExpandProgress();
             int expH = m.isImplemented() ? getExpandedHeight(m) : 0;
             int animH = (int)(expH * ep);
@@ -1124,9 +1164,72 @@ public class ClickGUI extends GuiScreen {
         return I18n.hasKey(key) ? I18n.format(key) : module.getName();
     }
 
+    private boolean isHiddenInModuleUX(Module module) {
+        return module instanceof ClickGUIModule;
+    }
+
     private String getSettingDisplayName(Module module, Setting<?> setting) {
         String key = "x4tweaker.setting." + normalizeKey(module.getName()) + "." + normalizeKey(setting.getName()) + ".name";
         return I18n.hasKey(key) ? I18n.format(key) : setting.getName();
+    }
+
+    private String getModuleStatusBadge(Module module) {
+        if (module.getReleaseState() == Module.ReleaseState.EXPERIMENTAL) return "[EXP]";
+        if (module.getReleaseState() == Module.ReleaseState.COMING_SOON) return "[SOON]";
+        return "";
+    }
+
+    private int getModuleStatusColor(Module module) {
+        if (module.getReleaseState() == Module.ReleaseState.EXPERIMENTAL) return 0xFFFFB347;
+        if (module.getReleaseState() == Module.ReleaseState.COMING_SOON) return 0xFFFF6666;
+        return 0xFFFFFFFF;
+    }
+
+    private List<String> buildModuleTooltipLines(Module module) {
+        List<String> lines = new ArrayList<String>();
+
+        String moduleKey = normalizeKey(module.getName());
+        String descKey = "x4tweaker.module." + moduleKey + ".desc";
+        String baseDesc = I18n.hasKey(descKey) ? I18n.format(descKey) : module.getDescription();
+        if (baseDesc == null || baseDesc.isEmpty()) baseDesc = module.getDescription();
+
+        if (module.getReleaseState() == Module.ReleaseState.COMING_SOON) {
+            lines.add("Coming Soon");
+        } else if (module.getReleaseState() == Module.ReleaseState.EXPERIMENTAL) {
+            lines.add("Experimental");
+        } else {
+            lines.add(baseDesc);
+        }
+
+        if (module.getReleaseState() == Module.ReleaseState.EXPERIMENTAL) {
+            lines.add("May change without notice.");
+        }
+
+        List<String> incompatibilities = getIncompatibilityNames(module);
+        if (!incompatibilities.isEmpty()) {
+            StringBuilder sb = new StringBuilder("Incompatible: ");
+            for (int i = 0; i < incompatibilities.size(); i++) {
+                if (i > 0) sb.append(", ");
+                sb.append(incompatibilities.get(i));
+            }
+            lines.add(sb.toString());
+        }
+
+        return lines;
+    }
+
+    private List<String> getIncompatibilityNames(Module module) {
+        List<String> names = new ArrayList<String>();
+        List<Class<? extends Module>> list = module.getIncompatibilities();
+        if (list == null || list.isEmpty()) return names;
+
+        for (int i = 0; i < list.size(); i++) {
+            Class<? extends Module> clazz = list.get(i);
+            Module target = X4TweakerClient.getInstance().getModuleManager().getModule(clazz);
+            if (target == null) continue;
+            names.add(getModuleDisplayName(target));
+        }
+        return names;
     }
 
     private String normalizeKey(String input) {

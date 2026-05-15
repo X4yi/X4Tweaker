@@ -1,6 +1,6 @@
 # Roadmap
 
-## beta v1.2 (actual) — Completado
+## r1.0 (actual) — Completado
 
 1. Refactor del sistema de combate (`LegitAttackOrchestrator` alineado con path vanilla).
 2. Fix de daño de arma (cooldown `getCooledAttackStrength(0.5F)` sincronizado con servidor).

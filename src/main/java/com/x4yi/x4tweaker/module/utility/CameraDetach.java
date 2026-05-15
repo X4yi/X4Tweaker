@@ -12,6 +12,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class CameraDetach extends Module {
 
     private final ModeSetting lockMode = new ModeSetting("Lock Mode", "Modo de camara", "Absolute", "Absolute", "Follow Player", "Orbit", "Cinematic Drone");
@@ -31,6 +34,11 @@ public class CameraDetach extends Module {
         addSetting(lockMode);
         addSetting(smoothSpeed);
         addSetting(panSpeed);
+    }
+
+    @Override
+    public List<Class<? extends Module>> getIncompatibilities() {
+        return Arrays.<Class<? extends Module>>asList(Freecam.class);
     }
 
     @Override

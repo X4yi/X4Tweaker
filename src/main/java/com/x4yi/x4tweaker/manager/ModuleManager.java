@@ -38,6 +38,15 @@ public class ModuleManager {
             new MobInfo(),
             new ContainerPreview()
         );
+
+        Module fastCrafting = getModuleByName("FastCrafting");
+        if (fastCrafting != null) fastCrafting.setReleaseState(Module.ReleaseState.EXPERIMENTAL);
+
+        Module containerPreview = getModuleByName("ContainerPreview");
+        if (containerPreview != null) containerPreview.setReleaseState(Module.ReleaseState.EXPERIMENTAL);
+
+        Module betterAfk = getModuleByName("BetterAFK");
+        if (betterAfk != null) betterAfk.setReleaseState(Module.ReleaseState.EXPERIMENTAL);
     }
 
     private void register(Module... mods) {

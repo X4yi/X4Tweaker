@@ -14,6 +14,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Freecam extends Module {
 
     private final NumberSetting speed = new NumberSetting("Speed", "Velocidad de vuelo", 1.0, 0.1, 5.0, 0.1);
@@ -31,6 +34,11 @@ public class Freecam extends Module {
         addSetting(verticalSpeed);
         addSetting(renderPlayer);
         addSetting(freezeRotations);
+    }
+
+    @Override
+    public List<Class<? extends Module>> getIncompatibilities() {
+        return Arrays.<Class<? extends Module>>asList(CameraDetach.class);
     }
 
     @Override

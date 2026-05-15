@@ -77,11 +77,11 @@
 ### FastCrafting
 
 - Clase: `module.random_tweaks.FastCrafting`
-- Estado: Implementado, falta pulir
-- Función: relleno de mesa de crafteo usando última receta detectada.
-- Interacción: `SPACE` relleno simple, `SHIFT + SPACE` máximo posible.
+- Estado: Rehecho (instantáneo)
+- Función: rellena y craftea de forma instantánea usando la última receta detectada.
+- Interacción: tecla configurable (default `SPACE`), `SHIFT + tecla` para crafteo masivo hasta agotar materiales.
 - Setting:
-  - `Click Delay` (1-20 ticks, default 2)
+  - `Trigger Key` (keycode, default `SPACE`)
 
 ## BOTS
 
@@ -145,4 +145,13 @@
 
 - Clase: `module.utility.ContainerPreview`
 - Estado: Implementado
-- Función: preview visual no interactiva de inventarios de contenedores al apuntarlos.
+- Función: preview visual automática al apuntar contenedores, con pipeline por ticks y cache de snapshot.
+- Settings:
+  - `Position` (LEFT_CROSSHAIR, RIGHT_CROSSHAIR, BOTTOM_RIGHT, CUSTOM)
+  - `Scale`
+  - `Opacity`
+  - `Fade Animation`
+  - `Blur Background`
+  - `Show Delay` (ticks)
+  - `Refresh Rate` (ticks)
+  - `Custom X` / `Custom Y` (si Position = CUSTOM)

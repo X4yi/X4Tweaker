@@ -1,4 +1,4 @@
-# Estado Actual (v1.2)
+# Estado Actual (r1.0)
 
 ## Resumen rápido
 
@@ -58,13 +58,13 @@
 - `ActiveTweaks`: implementado (HUD Position, Show Title).
 - `AutoSprint`: implementado.
 - `KillAuraLegit`: implementado (14 settings, reactivos, incompatible con BetterAFK).
-- `FastCrafting`: implementado (Click Delay).
+- `FastCrafting`: implementado (instantáneo, tecla configurable, modo masivo con SHIFT).
 - `ClickGUI`: implementado (RSHIFT, Theme Editor HSB).
 - `BetterAFK`: implementado (13 settings, máquina de estados, movimiento inteligente, multi-target).
 - `Freecam`: implementado (Vuelo libre con bypass de render nativo).
 - `CameraDetach`: implementado (Cinematic Drone, bypass de paquetes servidor).
 - `MobInfo`: implementado (Billboard world-space de info de entidades con fade/distancia).
-- `ContainerPreview`: implementado (Preview no interactiva de contenedores con cache/throttle).
+- `ContainerPreview`: implementado (preview automática por apuntado, cache por ticks, layout robusto en pantalla).
 
 ### Incompatibilidades activas
 
