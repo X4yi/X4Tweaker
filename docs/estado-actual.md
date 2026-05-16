@@ -1,10 +1,10 @@
-# Estado Actual (r1.0)
+# Estado Actual (r1.0.1)
 
 ## Resumen rápido
 
 - Estado general: `funcional` con combate y bots estables.
 - Configuración persistente: `sí` (JSON).
-- ClickGUI: `sí`, con scroll, scissor, keybind tab, drag tracking, traducción i18n.
+- ClickGUI: `sí`, con scroll, scissor visual + clipping de input, keybind tab, drag tracking, traducción i18n.
 - Automatización/bot: `framework funcional` con AFKBotTask y BotMovementController.
 - Pipeline de paquetes: `activo` (PacketEvent.Send/Receive vía Netty).
 - Localización: `en_us.lang` y `es_es.lang` completos.
@@ -49,20 +49,22 @@
 - Drag tracking para sliders (no se mueven al hover con click sostenido desde otro lugar).
 - Tooltips de módulos por `.lang` con fallback.
 - Botón `[X4]` inyectado en `GuiInventory`.
+- Hotfix de render aplicado para `Freecam`/`CameraDetach`: render local estable en cámara desacoplada y sin transparencia accidental.
 
 ### Módulos (13 totales)
 
 - `Fullbright`: implementado.
 - `PlayerESP`: implementado.
 - `ChestESP`: implementado.
+- `Lines` de ESP reimplementadas: origen en crosshair de cámara activa con offset de 2 bloques, ruta estable sin jitter.
 - `ActiveTweaks`: implementado (HUD Position, Show Title).
 - `AutoSprint`: implementado.
 - `KillAuraLegit`: implementado (14 settings, reactivos, incompatible con BetterAFK).
-- `FastCrafting`: implementado (instantáneo, tecla configurable, modo masivo con SHIFT).
-- `ClickGUI`: implementado (RSHIFT, Theme Editor HSB).
+- `FastCrafting`: implementado (instantáneo, SPACE y SHIFT + SPACE para crafteo masivo).
+- `ClickGUI`: implementado (RSHIFT).
 - `BetterAFK`: implementado (13 settings, máquina de estados, movimiento inteligente, multi-target).
-- `Freecam`: implementado (Vuelo libre con bypass de render nativo).
-- `CameraDetach`: implementado (Cinematic Drone, bypass de paquetes servidor).
+- `Freecam`: implementado.
+- `CameraDetach`: implementado (Cinematic Drone, Absolute, FollowPlayer, bypass de paquetes servidor).
 - `MobInfo`: implementado (Billboard world-space de info de entidades con fade/distancia).
 - `ContainerPreview`: implementado (preview automática por apuntado, cache por ticks, layout robusto en pantalla).
 
@@ -79,7 +81,6 @@
 ## Parcial / con deuda técnica
 
 - `InputController`: marca `inputLocked` pero ningún sistema externo lo consume para bloquear input real del jugador.
-- `ThemeManager`: carga y guarda colores pero no tiene editor visual de temas.
 - `AttackOrchestrator`: factory class que solo provee `createLegit()`, sin otras implementaciones.
 
 ## No implementado todavía

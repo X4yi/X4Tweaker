@@ -1,5 +1,6 @@
 package com.x4yi.x4tweaker.gui;
 
+import com.x4yi.x4tweaker.X4Tweaker;
 import com.x4yi.x4tweaker.core.X4TweakerClient;
 import com.x4yi.x4tweaker.gui.changelog.ChangelogScreen;
 import com.x4yi.x4tweaker.manager.ThemeManager;
@@ -11,6 +12,7 @@ import com.x4yi.x4tweaker.setting.NumberSetting;
 import com.x4yi.x4tweaker.setting.ModeSetting;
 import com.x4yi.x4tweaker.setting.StringListSetting;
 import com.x4yi.x4tweaker.setting.Setting;
+import com.x4yi.x4tweaker.utils.I18nUtils;
 import com.x4yi.x4tweaker.utils.RenderUtils;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
@@ -24,6 +26,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Main GUI class for X4Tweaker.
+ *
+ * TODO (Technical Debt): This class is currently a monolith (~1300 LOC).
+ * Future refactors should extract tab rendering and handling into separate classes:
+ * - ThemeTabRenderer (for drawThemeTab/handleThemeTabClick)
+ * - KeybindsTabRenderer (for drawKeybindsTab/handleKeybindsTabClick)
+ * - BotTabRenderer, etc.
+ *
+ * This will improve maintainability and separate rendering from state management.
+ */
 public class ClickGUI extends GuiScreen {
     private int ancho, alto, x, y;
     private static final int MIN_W = 340, MAX_W = 520, MIN_H = 220, MAX_H = 380;
@@ -58,8 +71,6 @@ public class ClickGUI extends GuiScreen {
     private float themeSat = 1.0f;
     private float themeVal = 1.0f;
     private int themeAlpha = 255;
-    private String inputR = "", inputG = "", inputB = "", inputA = "";
-    private int activeInputIndex = -1;
 
     private List<String> migrationNotices = new ArrayList<String>();
     private boolean showMigrationNotice = false;
@@ -166,19 +177,19 @@ public class ClickGUI extends GuiScreen {
         overlayScrollY += (targetOverlayScrollY - overlayScrollY) * LERP_SPEED;
 
 
-        RenderUtils.dibujarRectBordeado(x - 1, y - 1, x + ancho + 1, y + alto + 1, 1.5f, tema.getColorFondoBorde().getRGB(), 0x00000000);
-        RenderUtils.dibujarRect(x, y, x + ancho, y + alto, tema.getColorFondo().getRGB());
+        RenderUtils.drawBorderedRect(x - 1, y - 1, x + ancho + 1, y + alto + 1, 1.5f, tema.getColorFondoBorde().getRGB(), 0x00000000);
+        RenderUtils.drawRect(x, y, x + ancho, y + alto, tema.getColorFondo().getRGB());
 
 
-        RenderUtils.dibujarRectGradienteHorizontal(x, y, x + ancho, y + HEADER_H, tema.getColorBotonOscuro().getRGB(), tema.getColorBotonNormal().getRGB());
+        RenderUtils.drawGradientRectHorizontal(x, y, x + ancho, y + HEADER_H, tema.getColorBotonOscuro().getRGB(), tema.getColorBotonNormal().getRGB());
         mc.fontRenderer.drawStringWithShadow("X4Tweaker", x + 10, y + 10, 0xFFFFFFFF);
 
-        String ver = "r1.0";
+        String ver = X4Tweaker.VERSION;
         int verW = mc.fontRenderer.getStringWidth(ver);
         mc.fontRenderer.drawStringWithShadow(ver, x + (ancho - verW) / 2, y + 10, 0x88AAAAAA);
 
         boolean changelogHover = mouseX >= changelogBtnX1 && mouseX <= changelogBtnX2 && mouseY >= changelogBtnY1 && mouseY <= changelogBtnY2;
-        RenderUtils.dibujarRect(changelogBtnX1, changelogBtnY1, changelogBtnX2, changelogBtnY2, changelogHover ? 0x44FFFFFF : 0x22000000);
+        RenderUtils.drawRect(changelogBtnX1, changelogBtnY1, changelogBtnX2, changelogBtnY2, changelogHover ? 0x44FFFFFF : 0x22000000);
         mc.fontRenderer.drawStringWithShadow("Changelog", changelogBtnX1 + 6, changelogBtnY1 + 4, 0xFFFFFFFF);
 
 
@@ -190,7 +201,7 @@ public class ClickGUI extends GuiScreen {
             int pauseX = x + ancho - 80;
             int pauseEndX = x + ancho - 26;
             boolean pauseHover = mouseX >= pauseX && mouseX <= pauseEndX && mouseY >= y + 6 && mouseY <= y + 22;
-            RenderUtils.dibujarRect(pauseX, y + 7, pauseEndX, y + 21, pauseHover ? 0x44FFFFFF : 0x22FFFFFF);
+            RenderUtils.drawRect(pauseX, y + 7, pauseEndX, y + 21, pauseHover ? 0x44FFFFFF : 0x22FFFFFF);
             boolean paused = tema.isEnablePause();
             mc.fontRenderer.drawStringWithShadow("P:" + (paused ? "ON" : "OFF"), pauseX + 4, y + 10, paused ? 0xFF55FF55 : 0xFFFF5555);
         }
@@ -207,10 +218,10 @@ public class ClickGUI extends GuiScreen {
             boolean hover = mouseX >= x + 4 && mouseX <= x + SIDEBAR_W - 4 && mouseY >= catY && mouseY <= catY + 18;
 
             if (esSel) {
-                RenderUtils.dibujarRect(x + 2, catY, x + 5, catY + 18, tema.getColorBotonNormal().getRGB());
-                RenderUtils.dibujarRect(x + 5, catY, x + SIDEBAR_W - 4, catY + 18, 0x22FFFFFF);
+                RenderUtils.drawRect(x + 2, catY, x + 5, catY + 18, tema.getColorBotonNormal().getRGB());
+                RenderUtils.drawRect(x + 5, catY, x + SIDEBAR_W - 4, catY + 18, 0x22FFFFFF);
             } else if (hover) {
-                RenderUtils.dibujarRect(x + 5, catY, x + SIDEBAR_W - 4, catY + 18, 0x11FFFFFF);
+                RenderUtils.drawRect(x + 5, catY, x + SIDEBAR_W - 4, catY + 18, 0x11FFFFFF);
             }
 
             mc.fontRenderer.drawStringWithShadow(formatCategory(cat), x + 12, catY + 5, esSel ? 0xFFFFFFFF : 0xFF999999);
@@ -218,10 +229,10 @@ public class ClickGUI extends GuiScreen {
         }
 
 
-        RenderUtils.dibujarRect(x + SIDEBAR_W, y + HEADER_H, x + SIDEBAR_W + 1, y + alto, 0x33FFFFFF);
+        RenderUtils.drawRect(x + SIDEBAR_W, y + HEADER_H, x + SIDEBAR_W + 1, y + alto, 0x33FFFFFF);
 
 
-        RenderUtils.dibujarRect(x + SIDEBAR_W + 1, y + HEADER_H, x + ancho, y + alto, 0x0DFFFFFF);
+        RenderUtils.drawRect(x + SIDEBAR_W + 1, y + HEADER_H, x + ancho, y + alto, 0x0DFFFFFF);
 
         if (categoriaSeleccionada == Category.KEYBINDS) {
             drawKeybindsTab(mouseX, mouseY, tema);
@@ -266,7 +277,7 @@ public class ClickGUI extends GuiScreen {
         if (tx < 0) tx = 0;
         if (ty < 0) ty = 0;
 
-        RenderUtils.dibujarRectBordeado(tx, ty, tx + boxW, ty + boxH, 1.0f, 0xFF000000, 0xDD000000);
+        RenderUtils.drawBorderedRect(tx, ty, tx + boxW, ty + boxH, 1.0f, 0xFF000000, 0xDD000000);
         for (int i = 0; i < lines.size(); i++) {
             int color = i == 0 ? getModuleStatusColor(m) : 0xFFFFFFFF;
             mc.fontRenderer.drawStringWithShadow(lines.get(i), tx + 4, ty + 3 + (i * 10), color);
@@ -285,7 +296,7 @@ public class ClickGUI extends GuiScreen {
         if (tx < 0) tx = 0;
         if (ty < 0) ty = 0;
 
-        RenderUtils.dibujarRectBordeado(tx, ty, tx + textWidth + 8, ty + 14, 1.0f, 0xFF000000, 0xDD000000);
+        RenderUtils.drawBorderedRect(tx, ty, tx + textWidth + 8, ty + 14, 1.0f, 0xFF000000, 0xDD000000);
         mc.fontRenderer.drawStringWithShadow(tooltip, tx + 4, ty + 3, 0xFFFFFFFF);
     }
 
@@ -320,7 +331,7 @@ public class ClickGUI extends GuiScreen {
 
             int bgColor = hover ? 0x33FFFFFF : 0x22FFFFFF;
             if (!m.isImplemented()) bgColor = 0x11FFFFFF;
-            RenderUtils.dibujarRect(modX, modY, panelRight, modY + MOD_H, bgColor);
+            RenderUtils.drawRect(modX, modY, panelRight, modY + MOD_H, bgColor);
 
 
             if (m.isImplemented() && !m.getSettings().isEmpty()) {
@@ -345,8 +356,8 @@ public class ClickGUI extends GuiScreen {
                 int toggleX = panelRight - tw - 4;
                 int toggleColor = on ? 0xFF00AA44 : 0xFF882222;
                 int toggleBorder = on ? 0xFF00DD55 : 0xFFAA3333;
-                RenderUtils.dibujarRect(toggleX, modY + 4, panelRight - 4, modY + MOD_H - 4, toggleColor);
-                RenderUtils.dibujarRectBordeado(toggleX, modY + 4, panelRight - 4, modY + MOD_H - 4, 1.0f, toggleBorder, 0x00000000);
+                RenderUtils.drawRect(toggleX, modY + 4, panelRight - 4, modY + MOD_H - 4, toggleColor);
+                RenderUtils.drawBorderedRect(toggleX, modY + 4, panelRight - 4, modY + MOD_H - 4, 1.0f, toggleBorder, 0x00000000);
                 mc.fontRenderer.drawStringWithShadow(toggleTxt, toggleX + 4, modY + 7, 0xFFFFFFFF);
             }
 
@@ -355,7 +366,7 @@ public class ClickGUI extends GuiScreen {
 
             if (ep > 0.01f && m.isImplemented() && !m.getSettings().isEmpty()) {
                 int settingsTop = modY;
-                RenderUtils.dibujarRect(modX + 4, modY, panelRight, modY + animH, 0x22000000);
+                RenderUtils.drawRect(modX + 4, modY, panelRight, modY + animH, 0x22000000);
 
 
                 if (ep < 0.99f) {
@@ -375,7 +386,7 @@ public class ClickGUI extends GuiScreen {
 
                         boolean inputHover = mouseX >= modX + 10 && mouseX <= panelRight - 5 && mouseY >= setY && mouseY <= setY + 12;
                         if (inputHover) hoveredSettingTooltip = s;
-                        RenderUtils.dibujarRect(modX + 10, setY, panelRight - 5, setY + 12, inputHover ? 0x44FFFFFF : 0x22FFFFFF);
+                        RenderUtils.drawRect(modX + 10, setY, panelRight - 5, setY + 12, inputHover ? 0x44FFFFFF : 0x22FFFFFF);
                         String displayStr = (focusedSetting == s) ? currentInput + "_" : "Click to add...";
                         mc.fontRenderer.drawStringWithShadow(displayStr, modX + 14, setY + 2, 0xFFAAAAAA);
                         setY += SET_H;
@@ -458,7 +469,7 @@ public class ClickGUI extends GuiScreen {
                     } else {
                         boolean setHover = mouseX >= modX + 8 && mouseX <= panelRight - 5 && mouseY >= setY && mouseY <= setY + 14;
                         if (setHover) hoveredSettingTooltip = s;
-                        if (setHover) RenderUtils.dibujarRect(modX + 8, setY, panelRight - 5, setY + 14, 0x22FFFFFF);
+                        if (setHover) RenderUtils.drawRect(modX + 8, setY, panelRight - 5, setY + 14, 0x22FFFFFF);
                         mc.fontRenderer.drawStringWithShadow(getSettingDisplayName(m, s) + ": " + s.getValue(), modX + 10, setY + 3, 0xFFDDDDDD);
                         setY += SET_H;
                     }
@@ -466,7 +477,7 @@ public class ClickGUI extends GuiScreen {
 
 
                 boolean resetHover = mouseX >= modX + 8 && mouseX <= modX + 60 && mouseY >= setY && mouseY <= setY + 12;
-                RenderUtils.dibujarRect(modX + 8, setY, modX + 60, setY + 12, resetHover ? 0x44FF3333 : 0x22FF3333);
+                RenderUtils.drawRect(modX + 8, setY, modX + 60, setY + 12, resetHover ? 0x44FF3333 : 0x22FF3333);
                 mc.fontRenderer.drawStringWithShadow("[R] Reset", modX + 11, setY + 2, resetHover ? 0xFFFF5555 : 0xFF888888);
 
 
@@ -492,14 +503,14 @@ public class ClickGUI extends GuiScreen {
         GL11.glScissor((x + SIDEBAR_W + 1) * scale, mc.displayHeight - (y + alto) * scale, (ancho - SIDEBAR_W - 1) * scale, (alto - HEADER_H) * scale);
 
         boolean addHover = mouseX >= modX && mouseX <= panelRight && mouseY >= btnY && mouseY <= btnY + 20;
-        RenderUtils.dibujarRectGradienteHorizontal(modX, btnY, panelRight, btnY + 20, addHover ? 0xFF00AA00 : 0xFF008800, 0xFF006600);
+        RenderUtils.drawGradientRectHorizontal(modX, btnY, panelRight, btnY + 20, addHover ? 0xFF00AA00 : 0xFF008800, 0xFF006600);
         mc.fontRenderer.drawStringWithShadow("[+] Add Keybind", modX + 8, btnY + 6, 0xFFFFFFFF);
 
         int listY = btnY + 25;
         for (Module m : X4TweakerClient.getInstance().getModuleManager().getModules()) {
             if (isHiddenInModuleUX(m)) continue;
             if (m.getKeybind() == Keyboard.KEY_NONE) continue;
-            RenderUtils.dibujarRect(modX, listY, panelRight, listY + 18, 0x22000000);
+            RenderUtils.drawRect(modX, listY, panelRight, listY + 18, 0x22000000);
             mc.fontRenderer.drawStringWithShadow(getModuleDisplayName(m), modX + 5, listY + 5, 0xFFFFFFFF);
 
             String keyName = "[" + Keyboard.getKeyName(m.getKeybind()) + "]";
@@ -515,15 +526,15 @@ public class ClickGUI extends GuiScreen {
     }
 
     private void drawKeybindOverlay(int mouseX, int mouseY, ThemeManager tema) {
-        RenderUtils.dibujarRect(0, 0, this.width, this.height, 0xAA000000);
+        RenderUtils.drawRect(0, 0, this.width, this.height, 0xAA000000);
 
         int ox = this.width / 2 - 100;
         int oy = this.height / 2 - 100;
         int ow = 200;
         int oh = 200;
 
-        RenderUtils.dibujarRectBordeado(ox - 1, oy - 1, ox + ow + 1, oy + oh + 1, 1.5f, tema.getColorFondoBorde().getRGB(), 0x00000000);
-        RenderUtils.dibujarRect(ox, oy, ox + ow, oy + oh, tema.getColorFondo().getRGB());
+        RenderUtils.drawBorderedRect(ox - 1, oy - 1, ox + ow + 1, oy + oh + 1, 1.5f, tema.getColorFondoBorde().getRGB(), 0x00000000);
+        RenderUtils.drawRect(ox, oy, ox + ow, oy + oh, tema.getColorFondo().getRGB());
 
         mc.fontRenderer.drawStringWithShadow("Add Keybind", ox + 10, oy + 10, 0xFFFFFFFF);
 
@@ -532,7 +543,7 @@ public class ClickGUI extends GuiScreen {
 
         int listTop = oy + 45;
         int listBot = oy + oh - 30;
-        RenderUtils.dibujarRect(ox + 5, listTop, ox + ow - 5, listBot, 0x22000000);
+        RenderUtils.drawRect(ox + 5, listTop, ox + ow - 5, listBot, 0x22000000);
 
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -547,9 +558,9 @@ public class ClickGUI extends GuiScreen {
                 boolean isSelected = bindingModule == m;
                 boolean itemHover = mouseX >= ox + 5 && mouseX <= ox + ow - 5 && mouseY >= itemY && mouseY <= itemY + 14;
                 if (isSelected) {
-                    RenderUtils.dibujarRect(ox + 5, itemY, ox + ow - 5, itemY + 14, 0x4400FF00);
+                    RenderUtils.drawRect(ox + 5, itemY, ox + ow - 5, itemY + 14, 0x4400FF00);
                 } else if (itemHover) {
-                    RenderUtils.dibujarRect(ox + 5, itemY, ox + ow - 5, itemY + 14, 0x22FFFFFF);
+                    RenderUtils.drawRect(ox + 5, itemY, ox + ow - 5, itemY + 14, 0x22FFFFFF);
                 }
                 mc.fontRenderer.drawStringWithShadow(getModuleDisplayName(m), ox + 10, itemY + 3, isSelected ? 0xFFFFFFFF : 0xFFCCCCCC);
             }
@@ -560,11 +571,11 @@ public class ClickGUI extends GuiScreen {
 
         boolean canConfirm = bindingKey != Keyboard.KEY_NONE && bindingModule != null;
         boolean confHover = canConfirm && mouseX >= ox + 10 && mouseX <= ox + 90 && mouseY >= oy + oh - 25 && mouseY <= oy + oh - 5;
-        RenderUtils.dibujarRect(ox + 10, oy + oh - 25, ox + 90, oy + oh - 5, canConfirm ? (confHover ? 0xFF00AA00 : 0xFF008800) : 0xFF444444);
+        RenderUtils.drawRect(ox + 10, oy + oh - 25, ox + 90, oy + oh - 5, canConfirm ? (confHover ? 0xFF00AA00 : 0xFF008800) : 0xFF444444);
         mc.fontRenderer.drawStringWithShadow("Confirm", ox + 30, oy + oh - 18, canConfirm ? 0xFFFFFFFF : 0xFFAAAAAA);
 
         boolean canHover = mouseX >= ox + 110 && mouseX <= ox + 190 && mouseY >= oy + oh - 25 && mouseY <= oy + oh - 5;
-        RenderUtils.dibujarRect(ox + 110, oy + oh - 25, ox + 190, oy + oh - 5, canHover ? 0xFFAA0000 : 0xFF880000);
+        RenderUtils.drawRect(ox + 110, oy + oh - 25, ox + 190, oy + oh - 5, canHover ? 0xFFAA0000 : 0xFF880000);
         mc.fontRenderer.drawStringWithShadow("Cancel", ox + 135, oy + oh - 18, 0xFFFFFFFF);
     }
 
@@ -579,12 +590,16 @@ public class ClickGUI extends GuiScreen {
         GL11.glScissor((x + SIDEBAR_W + 1) * scale, mc.displayHeight - (y + alto) * scale, (ancho - SIDEBAR_W - 1) * scale, (alto - HEADER_H) * scale);
 
         if (themeSelectedIndex == -1) {
+            mc.fontRenderer.drawStringWithShadow(themeText("theme.select.title", "Select a Color Slot"), modX, listY, 0xFFFFFFFF);
+            listY += 13;
+            mc.fontRenderer.drawStringWithShadow(themeText("theme.select.hint", "Click one entry to edit it."), modX, listY, 0xFFAAAAAA);
+            listY += 16;
             for (int i = 0; i < tema.getColorCount(); i++) {
                 boolean hover = mouseX >= modX && mouseX <= panelRight && mouseY >= listY && mouseY <= listY + 20;
-                RenderUtils.dibujarRect(modX, listY, panelRight, listY + 20, hover ? 0x44FFFFFF : 0x22000000);
+                RenderUtils.drawRect(modX, listY, panelRight, listY + 20, hover ? 0x44FFFFFF : 0x22000000);
 
                 int rgb = tema.getColorByIndex(i).getRGB();
-                RenderUtils.dibujarRectBordeado(modX + 5, listY + 5, modX + 15, listY + 15, 1.0f, 0xFF000000, rgb);
+                RenderUtils.drawBorderedRect(modX + 5, listY + 5, modX + 15, listY + 15, 1.0f, 0xFF000000, rgb);
                 mc.fontRenderer.drawStringWithShadow(tema.getColorName(i), modX + 20, listY + 6, 0xFFFFFFFF);
 
                 String hex = String.format("#%08X", rgb);
@@ -592,9 +607,9 @@ public class ClickGUI extends GuiScreen {
                 mc.fontRenderer.drawStringWithShadow(hex, panelRight - 5 - textW, listY + 6, 0xFFAAAAAA);
                 listY += 22;
             }
-            boolean resetHover = mouseX >= modX && mouseX <= modX + 80 && mouseY >= listY && mouseY <= listY + 15;
-            RenderUtils.dibujarRect(modX, listY, modX + 80, listY + 15, resetHover ? 0xFFAA0000 : 0xFF880000);
-            mc.fontRenderer.drawStringWithShadow("Reset Theme", modX + 5, listY + 4, 0xFFFFFFFF);
+            boolean resetHover = mouseX >= modX && mouseX <= modX + 95 && mouseY >= listY && mouseY <= listY + 15;
+            RenderUtils.drawRect(modX, listY, modX + 95, listY + 15, resetHover ? 0xFFAA0000 : 0xFF880000);
+            mc.fontRenderer.drawStringWithShadow(themeText("theme.action.reset_all", "Reset All"), modX + 5, listY + 4, 0xFFFFFFFF);
         } else {
             if (themeDraggingSatVal) {
                 float sat = Math.max(0, Math.min(1, (float)(mouseX - modX) / 160f));
@@ -612,64 +627,59 @@ public class ClickGUI extends GuiScreen {
                 updateSelectedThemeColor(tema);
             }
 
-            mc.fontRenderer.drawStringWithShadow("Editing: " + tema.getColorName(themeSelectedIndex), modX, listY, 0xFFFFFFFF);
+            mc.fontRenderer.drawStringWithShadow(themeText("theme.edit.title", "Editing") + ": " + tema.getColorName(themeSelectedIndex), modX, listY, 0xFFFFFFFF);
             listY += 15;
+            mc.fontRenderer.drawStringWithShadow(themeText("theme.edit.hint", "Drag inside bars to adjust hue, saturation, brightness and alpha."), modX, listY, 0xFFAAAAAA);
+            listY += 12;
 
             int currentRgb = tema.getColorByIndex(themeSelectedIndex).getRGB();
-            RenderUtils.dibujarRectBordeado(modX + 170, listY, modX + 210, listY + 100, 1.0f, 0xFF000000, currentRgb);
+            RenderUtils.drawBorderedRect(modX + 170, listY, modX + 210, listY + 100, 1.0f, 0xFF000000, currentRgb);
 
-            RenderUtils.dibujarRect(modX, listY, modX + 160, listY + 100, 0xFF000000);
+            RenderUtils.drawRect(modX, listY, modX + 160, listY + 100, 0xFF000000);
             for (int dx = 0; dx < 160; dx += 2) {
                 for (int dy = 0; dy < 100; dy += 2) {
                     float s = (float)dx / 160f;
                     float v = 1.0f - ((float)dy / 100f);
                     int rgb = java.awt.Color.HSBtoRGB(themeHue, s, v);
-                    RenderUtils.dibujarRect(modX + dx, listY + dy, modX + dx + 2, listY + dy + 2, rgb | 0xFF000000);
+                    RenderUtils.drawRect(modX + dx, listY + dy, modX + dx + 2, listY + dy + 2, rgb | 0xFF000000);
                 }
             }
             int px = modX + (int)(themeSat * 160);
             int py = listY + (int)((1.0f - themeVal) * 100);
-            RenderUtils.dibujarRectBordeado(px - 2, py - 2, px + 2, py + 2, 1.0f, 0xFF000000, 0xFFFFFFFF);
+            RenderUtils.drawBorderedRect(px - 2, py - 2, px + 2, py + 2, 1.0f, 0xFF000000, 0xFFFFFFFF);
 
             listY += 105;
 
             for (int dx = 0; dx < 160; dx++) {
                 float h = (float)dx / 160f;
                 int rgb = java.awt.Color.HSBtoRGB(h, 1.0f, 1.0f);
-                RenderUtils.dibujarRect(modX + dx, listY, modX + dx + 1, listY + 10, rgb | 0xFF000000);
+                RenderUtils.drawRect(modX + dx, listY, modX + dx + 1, listY + 10, rgb | 0xFF000000);
             }
             int hx = modX + (int)(themeHue * 160);
-            RenderUtils.dibujarRectBordeado(hx - 2, listY - 1, hx + 2, listY + 11, 1.0f, 0xFF000000, 0xFFFFFFFF);
+            RenderUtils.drawBorderedRect(hx - 2, listY - 1, hx + 2, listY + 11, 1.0f, 0xFF000000, 0xFFFFFFFF);
             listY += 15;
 
-            RenderUtils.dibujarRect(modX, listY, modX + 160, listY + 10, 0xFF000000);
-            RenderUtils.dibujarRectGradienteHorizontal(modX, listY, modX + 160, listY + 10, currentRgb & 0x00FFFFFF, currentRgb | 0xFF000000);
+            RenderUtils.drawRect(modX, listY, modX + 160, listY + 10, 0xFF000000);
+            RenderUtils.drawGradientRectHorizontal(modX, listY, modX + 160, listY + 10, currentRgb & 0x00FFFFFF, currentRgb | 0xFF000000);
             int ax = modX + (int)((themeAlpha / 255f) * 160);
-            RenderUtils.dibujarRectBordeado(ax - 2, listY - 1, ax + 2, listY + 11, 1.0f, 0xFF000000, 0xFFFFFFFF);
+            RenderUtils.drawBorderedRect(ax - 2, listY - 1, ax + 2, listY + 11, 1.0f, 0xFF000000, 0xFFFFFFFF);
             listY += 15;
 
             java.awt.Color c = tema.getColorByIndex(themeSelectedIndex);
-            drawThemeInput(modX, listY, "R", c.getRed(), 0, mouseX, mouseY);
-            drawThemeInput(modX + 45, listY, "G", c.getGreen(), 1, mouseX, mouseY);
-            drawThemeInput(modX + 90, listY, "B", c.getBlue(), 2, mouseX, mouseY);
-            drawThemeInput(modX + 135, listY, "A", c.getAlpha(), 3, mouseX, mouseY);
-            listY += 20;
+            String rgba = "RGBA " + c.getRed() + ", " + c.getGreen() + ", " + c.getBlue() + ", " + c.getAlpha();
+            mc.fontRenderer.drawStringWithShadow(rgba, modX, listY, 0xFFDDDDDD);
+            listY += 18;
 
-            boolean backHover = mouseX >= modX && mouseX <= modX + 60 && mouseY >= listY && mouseY <= listY + 15;
-            RenderUtils.dibujarRect(modX, listY, modX + 60, listY + 15, backHover ? 0xFF00AA00 : 0xFF008800);
-            mc.fontRenderer.drawStringWithShadow("Save & Back", modX + 5, listY + 4, 0xFFFFFFFF);
+            boolean resetSlotHover = mouseX >= modX && mouseX <= modX + 80 && mouseY >= listY && mouseY <= listY + 15;
+            RenderUtils.drawRect(modX, listY, modX + 80, listY + 15, resetSlotHover ? 0xFFAA5500 : 0xFF884400);
+            mc.fontRenderer.drawStringWithShadow(themeText("theme.action.reset_slot", "Reset Slot"), modX + 5, listY + 4, 0xFFFFFFFF);
+
+            boolean backHover = mouseX >= modX + 86 && mouseX <= modX + 181 && mouseY >= listY && mouseY <= listY + 15;
+            RenderUtils.drawRect(modX + 86, listY, modX + 181, listY + 15, backHover ? 0xFF00AA00 : 0xFF008800);
+            mc.fontRenderer.drawStringWithShadow(themeText("theme.action.save_back", "Save & Back"), modX + 90, listY + 4, 0xFFFFFFFF);
         }
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
-    }
-
-    private void drawThemeInput(int xPos, int yPos, String label, int currentVal, int index, int mouseX, int mouseY) {
-        mc.fontRenderer.drawStringWithShadow(label + ":", xPos, yPos + 3, 0xFFAAAAAA);
-        boolean hover = mouseX >= xPos + 12 && mouseX <= xPos + 38 && mouseY >= yPos && mouseY <= yPos + 14;
-        String activeInput = activeInputIndex == index ? (index == 0 ? inputR : index == 1 ? inputG : index == 2 ? inputB : inputA) : null;
-        RenderUtils.dibujarRect(xPos + 12, yPos, xPos + 38, yPos + 14, activeInput != null ? 0x44FFFFFF : (hover ? 0x22FFFFFF : 0x22000000));
-        String text = activeInput != null ? activeInput + "_" : String.valueOf(currentVal);
-        mc.fontRenderer.drawStringWithShadow(text, xPos + 15, yPos + 3, 0xFFFFFFFF);
     }
 
     private void updateSelectedThemeColor(ThemeManager tema) {
@@ -678,6 +688,11 @@ public class ClickGUI extends GuiScreen {
         int g = (rgb >> 8) & 0xFF;
         int b = rgb & 0xFF;
         tema.setColorByIndex(themeSelectedIndex, new java.awt.Color(r, g, b, themeAlpha));
+    }
+
+    private String themeText(String key, String fallback) {
+        String full = "x4tweaker.clickgui." + key;
+        return I18n.hasKey(full) ? I18n.format(full) : fallback;
     }
 
     private void manejarScroll() {
@@ -770,17 +785,19 @@ public class ClickGUI extends GuiScreen {
                 targetScrollY = 0;
                 scrollY = 0;
                 themeSelectedIndex = -1;
-                activeInputIndex = -1;
                 return;
             }
             if (cat != Category.KEYBINDS) catY += 21;
         }
 
         if (categoriaSeleccionada == Category.KEYBINDS) {
+            if (!isInsideMainViewport(mouseX, mouseY)) return;
             handleKeybindsTabClick(mouseX, mouseY, mouseButton);
         } else if (categoriaSeleccionada == Category.THEME) {
+            if (!isInsideMainViewport(mouseX, mouseY)) return;
             handleThemeTabClick(mouseX, mouseY, mouseButton);
         } else {
+            if (!isInsideMainViewport(mouseX, mouseY)) return;
             handleModulesTabClick(mouseX, mouseY, mouseButton);
         }
     }
@@ -797,7 +814,7 @@ public class ClickGUI extends GuiScreen {
         for (Module m : X4TweakerClient.getInstance().getModuleManager().getModules()) {
             if (isHiddenInModuleUX(m)) continue;
             if (itemY + 14 > listTop && itemY < listBot) {
-                if (mouseX >= ox + 5 && mouseX <= ox + ow - 5 && mouseY >= itemY && mouseY <= itemY + 14) {
+                if (isInsideOverlayList(mouseX, mouseY, ox, ow, listTop, listBot) && mouseY >= itemY && mouseY <= itemY + 14) {
                     bindingModule = m;
                     return;
                 }
@@ -820,6 +837,8 @@ public class ClickGUI extends GuiScreen {
     }
 
     private void handleKeybindsTabClick(int mouseX, int mouseY, int mouseButton) {
+        if (!isInsideMainViewport(mouseX, mouseY)) return;
+
         int modX = x + SIDEBAR_W + 6;
         int panelRight = x + ancho - 6;
         int btnY = y + HEADER_H + 6 + (int)scrollY;
@@ -889,13 +908,19 @@ public class ClickGUI extends GuiScreen {
 
             if (ep > 0.5f && m.isImplemented() && !m.getSettings().isEmpty()) {
                 int setY = modY + 2;
+                int panelTop = modY;
+                int panelBottom = modY + animH;
                 for (Setting<?> s : m.getSettings()) {
                     if (!s.isVisible()) continue;
 
                     if (s instanceof StringListSetting) {
                         StringListSetting sl = (StringListSetting) s;
+                        if (!isVisibleRow(setY, vpTop, vpBot) || !isVisibleInPanel(setY, SET_H, panelTop, panelBottom)) {
+                            setY += SET_H * 2 + (sl.getValue().size() * 14);
+                            continue;
+                        }
                         setY += SET_H;
-                        if (mouseButton == 0 && mouseX >= modX + 10 && mouseX <= panelRight - 5 && mouseY >= setY && mouseY <= setY + 12) {
+                        if (mouseButton == 0 && isInsideMainViewport(mouseX, mouseY) && isVisibleInPanel(setY, 12, panelTop, panelBottom) && mouseX >= modX + 10 && mouseX <= panelRight - 5 && mouseY >= setY && mouseY <= setY + 12) {
                             focusedSetting = s;
                             currentInput = "";
                             return;
@@ -903,7 +928,7 @@ public class ClickGUI extends GuiScreen {
                         setY += SET_H;
                         String toRemove = null;
                         for (String item : sl.getValue()) {
-                            if (mouseButton == 0 && mouseX >= panelRight - 20 && mouseX <= panelRight - 5 && mouseY >= setY && mouseY <= setY + 10) {
+                            if (mouseButton == 0 && isInsideMainViewport(mouseX, mouseY) && isVisibleInPanel(setY, 10, panelTop, panelBottom) && mouseX >= panelRight - 20 && mouseX <= panelRight - 5 && mouseY >= setY && mouseY <= setY + 10) {
                                 toRemove = item;
                             }
                             setY += 14;
@@ -917,7 +942,11 @@ public class ClickGUI extends GuiScreen {
                         NumberSetting ns = (NumberSetting) s;
                         int sliderX = modX + 8;
                         int sliderRight = panelRight - 5;
-                        if (mouseButton == 0 && mouseX >= sliderX && mouseX <= sliderRight && mouseY >= setY && mouseY <= setY + 14) {
+                        if (!isVisibleRow(setY, vpTop, vpBot) || !isVisibleInPanel(setY, SET_H, panelTop, panelBottom)) {
+                            setY += SET_H;
+                            continue;
+                        }
+                        if (mouseButton == 0 && isInsideMainViewport(mouseX, mouseY) && mouseX >= sliderX && mouseX <= sliderRight && mouseY >= setY && mouseY <= setY + 14) {
                             draggingSlider = ns;
                             int sliderW = sliderRight - sliderX;
                             double clickRatio = Math.max(0, Math.min(1, (double)(mouseX - sliderX) / sliderW));
@@ -926,7 +955,11 @@ public class ClickGUI extends GuiScreen {
                         }
                         setY += SET_H;
                     } else if (s instanceof BooleanSetting) {
-                        if (mouseButton == 0 && mouseX >= modX + 8 && mouseX <= panelRight - 5 && mouseY >= setY && mouseY <= setY + 14) {
+                        if (!isVisibleRow(setY, vpTop, vpBot) || !isVisibleInPanel(setY, SET_H, panelTop, panelBottom)) {
+                            setY += SET_H;
+                            continue;
+                        }
+                        if (mouseButton == 0 && isInsideMainViewport(mouseX, mouseY) && mouseX >= modX + 8 && mouseX <= panelRight - 5 && mouseY >= setY && mouseY <= setY + 14) {
                             ((BooleanSetting) s).toggle();
                             X4TweakerClient.getInstance().getConfigManager().save();
                             return;
@@ -938,7 +971,12 @@ public class ClickGUI extends GuiScreen {
                         int modeW = mc.fontRenderer.getStringWidth(modeVal);
                         int centerX = modX + (panelRight - modX) / 2;
 
-                        if (mouseY >= setY && mouseY <= setY + 14) {
+                        if (!isVisibleRow(setY, vpTop, vpBot) || !isVisibleInPanel(setY, SET_H, panelTop, panelBottom)) {
+                            setY += SET_H;
+                            continue;
+                        }
+
+                        if (isInsideMainViewport(mouseX, mouseY) && mouseY >= setY && mouseY <= setY + 14) {
                             if (mouseX >= centerX - modeW/2 - 14 && mouseX <= centerX - modeW/2 - 4) {
                                 if (mouseButton == 0) ms.cycleBack();
                                 X4TweakerClient.getInstance().getConfigManager().save();
@@ -963,7 +1001,11 @@ public class ClickGUI extends GuiScreen {
                         }
                         setY += SET_H;
                     } else {
-                        if (mouseButton == 0 && mouseX >= modX + 8 && mouseX <= panelRight - 5 && mouseY >= setY && mouseY <= setY + 14) {
+                        if (!isVisibleRow(setY, vpTop, vpBot) || !isVisibleInPanel(setY, SET_H, panelTop, panelBottom)) {
+                            setY += SET_H;
+                            continue;
+                        }
+                        if (mouseButton == 0 && isInsideMainViewport(mouseX, mouseY) && mouseX >= modX + 8 && mouseX <= panelRight - 5 && mouseY >= setY && mouseY <= setY + 14) {
                             if (s instanceof BooleanSetting) ((BooleanSetting) s).toggle();
                             X4TweakerClient.getInstance().getConfigManager().save();
                             return;
@@ -973,7 +1015,7 @@ public class ClickGUI extends GuiScreen {
                 }
 
 
-                if (mouseButton == 0 && mouseX >= modX + 8 && mouseX <= modX + 60 && mouseY >= setY && mouseY <= setY + 12) {
+                if (mouseButton == 0 && isInsideMainViewport(mouseX, mouseY) && isVisibleRow(setY, vpTop, vpBot) && isVisibleInPanel(setY, 12, panelTop, panelBottom) && mouseX >= modX + 8 && mouseX <= modX + 60 && mouseY >= setY && mouseY <= setY + 12) {
                     for (Setting<?> s : m.getSettings()) s.reset();
                     X4TweakerClient.getInstance().getConfigManager().save();
                     return;
@@ -985,12 +1027,15 @@ public class ClickGUI extends GuiScreen {
     }
 
     private void handleThemeTabClick(int mouseX, int mouseY, int mouseButton) {
+        if (!isInsideMainViewport(mouseX, mouseY)) return;
+
         int modX = x + SIDEBAR_W + 6;
         int panelRight = x + ancho - 6;
         int listY = y + HEADER_H + 6 + (int)scrollY;
         ThemeManager tema = X4TweakerClient.getInstance().getThemeManager();
 
         if (themeSelectedIndex == -1) {
+            listY += 29;
             for (int i = 0; i < tema.getColorCount(); i++) {
                 if (mouseX >= modX && mouseX <= panelRight && mouseY >= listY && mouseY <= listY + 20) {
                     themeSelectedIndex = i;
@@ -1006,13 +1051,13 @@ public class ClickGUI extends GuiScreen {
                 }
                 listY += 22;
             }
-            if (mouseButton == 0 && mouseX >= modX && mouseX <= modX + 80 && mouseY >= listY && mouseY <= listY + 15) {
+            if (mouseButton == 0 && mouseX >= modX && mouseX <= modX + 95 && mouseY >= listY && mouseY <= listY + 15) {
                 tema.loadDefaultTheme();
                 tema.save();
                 return;
             }
         } else {
-            listY += 15;
+            listY += 27;
 
             if (mouseX >= modX && mouseX <= modX + 160 && mouseY >= listY && mouseY <= listY + 100) {
                 themeDraggingSatVal = true;
@@ -1030,36 +1075,25 @@ public class ClickGUI extends GuiScreen {
                 themeDraggingAlpha = true;
                 return;
             }
-            listY += 15;
+            listY += 33;
 
-            if (checkThemeInputClick(mouseX, mouseY, modX, listY, 0)) return;
-            if (checkThemeInputClick(mouseX, mouseY, modX + 45, listY, 1)) return;
-            if (checkThemeInputClick(mouseX, mouseY, modX + 90, listY, 2)) return;
-            if (checkThemeInputClick(mouseX, mouseY, modX + 135, listY, 3)) return;
-
-            listY += 20;
-
-            if (mouseX >= modX && mouseX <= modX + 60 && mouseY >= listY && mouseY <= listY + 15) {
-                activeInputIndex = -1;
+            if (mouseX >= modX && mouseX <= modX + 80 && mouseY >= listY && mouseY <= listY + 15) {
+                java.awt.Color fallback = tema.getDefaultColorByIndex(themeSelectedIndex);
+                tema.setColorByIndex(themeSelectedIndex, fallback);
+                float[] hsb = java.awt.Color.RGBtoHSB(fallback.getRed(), fallback.getGreen(), fallback.getBlue(), null);
+                themeHue = hsb[0];
+                themeSat = hsb[1];
+                themeVal = hsb[2];
+                themeAlpha = fallback.getAlpha();
+                tema.save();
+                return;
+            }
+            if (mouseX >= modX + 86 && mouseX <= modX + 181 && mouseY >= listY && mouseY <= listY + 15) {
                 themeSelectedIndex = -1;
                 tema.save();
                 return;
             }
-            activeInputIndex = -1;
         }
-    }
-
-    private boolean checkThemeInputClick(int mouseX, int mouseY, int xPos, int yPos, int index) {
-        if (mouseX >= xPos + 12 && mouseX <= xPos + 38 && mouseY >= yPos && mouseY <= yPos + 14) {
-            activeInputIndex = index;
-            java.awt.Color c = X4TweakerClient.getInstance().getThemeManager().getColorByIndex(themeSelectedIndex);
-            if (index == 0) inputR = String.valueOf(c.getRed());
-            else if (index == 1) inputG = String.valueOf(c.getGreen());
-            else if (index == 2) inputB = String.valueOf(c.getBlue());
-            else if (index == 3) inputA = String.valueOf(c.getAlpha());
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -1094,47 +1128,12 @@ public class ClickGUI extends GuiScreen {
             return;
         }
 
-        if (themeSelectedIndex != -1 && activeInputIndex != -1) {
-            if (keyCode == Keyboard.KEY_ESCAPE) { activeInputIndex = -1; return; }
-            if (keyCode == Keyboard.KEY_RETURN) { applyThemeInput(); activeInputIndex = -1; return; }
-            if (keyCode == Keyboard.KEY_BACK) {
-                if (activeInputIndex == 0 && !inputR.isEmpty()) inputR = inputR.substring(0, inputR.length() - 1);
-                else if (activeInputIndex == 1 && !inputG.isEmpty()) inputG = inputG.substring(0, inputG.length() - 1);
-                else if (activeInputIndex == 2 && !inputB.isEmpty()) inputB = inputB.substring(0, inputB.length() - 1);
-                else if (activeInputIndex == 3 && !inputA.isEmpty()) inputA = inputA.substring(0, inputA.length() - 1);
-                return;
-            }
-            if (Character.isDigit(typedChar)) {
-                if (activeInputIndex == 0 && inputR.length() < 3) inputR += typedChar;
-                else if (activeInputIndex == 1 && inputG.length() < 3) inputG += typedChar;
-                else if (activeInputIndex == 2 && inputB.length() < 3) inputB += typedChar;
-                else if (activeInputIndex == 3 && inputA.length() < 3) inputA += typedChar;
-            }
+        if (themeSelectedIndex != -1 && keyCode == Keyboard.KEY_ESCAPE) {
+            themeSelectedIndex = -1;
             return;
         }
 
         super.keyTyped(typedChar, keyCode);
-    }
-
-    private void applyThemeInput() {
-        try {
-            int r = inputR.isEmpty() ? 0 : Integer.parseInt(inputR);
-            int g = inputG.isEmpty() ? 0 : Integer.parseInt(inputG);
-            int b = inputB.isEmpty() ? 0 : Integer.parseInt(inputB);
-            int a = inputA.isEmpty() ? 0 : Integer.parseInt(inputA);
-            r = Math.max(0, Math.min(255, r));
-            g = Math.max(0, Math.min(255, g));
-            b = Math.max(0, Math.min(255, b));
-            a = Math.max(0, Math.min(255, a));
-            java.awt.Color c = new java.awt.Color(r, g, b, a);
-            X4TweakerClient.getInstance().getThemeManager().setColorByIndex(themeSelectedIndex, c);
-            float[] hsb = java.awt.Color.RGBtoHSB(r, g, b, null);
-            themeHue = hsb[0];
-            themeSat = hsb[1];
-            themeVal = hsb[2];
-            themeAlpha = a;
-            X4TweakerClient.getInstance().getThemeManager().save();
-        } catch (Exception ignored) {}
     }
 
     @Override
@@ -1233,10 +1232,27 @@ public class ClickGUI extends GuiScreen {
     }
 
     private String normalizeKey(String input) {
-        String normalized = input.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "_");
-        while (normalized.startsWith("_")) normalized = normalized.substring(1);
-        while (normalized.endsWith("_")) normalized = normalized.substring(0, normalized.length() - 1);
-        return normalized;
+        return I18nUtils.normalizeKey(input);
+    }
+
+    private boolean isInsideMainViewport(int mouseX, int mouseY) {
+        int left = x + SIDEBAR_W + 1;
+        int right = x + ancho;
+        int top = y + HEADER_H;
+        int bottom = y + alto;
+        return mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom;
+    }
+
+    private boolean isVisibleRow(int rowY, int vpTop, int vpBot) {
+        return rowY + SET_H >= vpTop && rowY <= vpBot;
+    }
+
+    private boolean isVisibleInPanel(int rowY, int rowHeight, int panelTop, int panelBottom) {
+        return rowY + rowHeight >= panelTop && rowY <= panelBottom;
+    }
+
+    private boolean isInsideOverlayList(int mouseX, int mouseY, int ox, int ow, int listTop, int listBot) {
+        return mouseX >= ox + 5 && mouseX <= ox + ow - 5 && mouseY >= listTop && mouseY <= listBot;
     }
 
     private void drawMigrationNotice(int mouseX, int mouseY) {
@@ -1247,8 +1263,8 @@ public class ClickGUI extends GuiScreen {
         int bx2 = x + ancho - 8;
         int by2 = by1 + 78;
 
-        RenderUtils.dibujarRect(bx1, by1, bx2, by2, 0xCC101010);
-        RenderUtils.dibujarRectBordeado(bx1, by1, bx2, by2, 1.0f, 0xFF3A9D5D, 0x00000000);
+        RenderUtils.drawRect(bx1, by1, bx2, by2, 0xCC101010);
+        RenderUtils.drawBorderedRect(bx1, by1, bx2, by2, 1.0f, 0xFF3A9D5D, 0x00000000);
         mc.fontRenderer.drawStringWithShadow("Config actualizada - revisa ajustes", bx1 + 6, by1 + 6, 0xFFFFFFFF);
 
         int closeX = bx2 - 16;

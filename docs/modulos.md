@@ -79,9 +79,7 @@
 - Clase: `module.random_tweaks.FastCrafting`
 - Estado: Rehecho (instantáneo)
 - Función: rellena y craftea de forma instantánea usando la última receta detectada.
-- Interacción: tecla configurable (default `SPACE`), `SHIFT + tecla` para crafteo masivo hasta agotar materiales.
-- Setting:
-  - `Trigger Key` (keycode, default `SPACE`)
+- Interacción: tecla fija `SPACE`, `SHIFT + SPACE` para crafteo masivo hasta agotar materiales.
 
 ## BOTS
 

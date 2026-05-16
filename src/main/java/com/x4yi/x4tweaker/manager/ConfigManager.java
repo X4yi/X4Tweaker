@@ -211,7 +211,10 @@ public class ConfigManager {
         if ("r1.0".equalsIgnoreCase(buildVersion)) {
             return 4;
         }
-        return 4;
+        if ("r1.0.1".equalsIgnoreCase(buildVersion)) {
+            return 5;
+        }
+        return 5;
     }
 
     private void migrateMobEspSettings(JsonObject settings) {

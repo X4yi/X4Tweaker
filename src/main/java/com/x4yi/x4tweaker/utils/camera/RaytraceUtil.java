@@ -14,6 +14,13 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class RaytraceUtil {
+    private static final Predicate<Entity> COLLIDABLE_PREDICATE = new Predicate<Entity>() {
+        public boolean apply(@Nullable Entity p_apply_1_) {
+            return p_apply_1_ != null && p_apply_1_.canBeCollidedWith();
+        }
+    };
+    private static final Predicate<Entity> TARGET_PREDICATE = Predicates.and(EntitySelectors.NOT_SPECTATING, COLLIDABLE_PREDICATE);
+
 
 
     public static void updateMouseOver(float partialTicks) {
@@ -44,11 +51,7 @@ public class RaytraceUtil {
         mc.pointedEntity = null;
         Vec3d vec3d3 = null;
 
-        List<Entity> list = mc.world.getEntitiesInAABBexcluding(entity, entity.getEntityBoundingBox().expand(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0).grow(1.0D, 1.0D, 1.0D), Predicates.and(EntitySelectors.NOT_SPECTATING, new Predicate<Entity>() {
-            public boolean apply(@Nullable Entity p_apply_1_) {
-                return p_apply_1_ != null && p_apply_1_.canBeCollidedWith();
-            }
-        }));
+        List<Entity> list = mc.world.getEntitiesInAABBexcluding(entity, entity.getEntityBoundingBox().expand(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0).grow(1.0D, 1.0D, 1.0D), TARGET_PREDICATE);
 
         double d2 = d1;
 

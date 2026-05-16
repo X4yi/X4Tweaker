@@ -4,7 +4,7 @@ Mod cliente para Minecraft `1.12.2` (Forge `14.23.5.2864`) enfocado en tweaks de
 
 ## Estado del proyecto
 
-- Versión actual: r1.0
+- Versión actual: r1.0.1
 - Estado general: funcional y usable
 - Licencia: **MIT**
 

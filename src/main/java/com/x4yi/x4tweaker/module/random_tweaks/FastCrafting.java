@@ -2,7 +2,6 @@ package com.x4yi.x4tweaker.module.random_tweaks;
 
 import com.x4yi.x4tweaker.module.Category;
 import com.x4yi.x4tweaker.module.Module;
-import com.x4yi.x4tweaker.setting.NumberSetting;
 import net.minecraft.client.gui.inventory.GuiCrafting;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.ContainerWorkbench;
@@ -22,11 +21,8 @@ public class FastCrafting extends Module {
     private final ItemStack[] lastRecipe = new ItemStack[9];
     private boolean triggerPressed = false;
 
-    private final NumberSetting triggerKey = new NumberSetting("Trigger Key", "Tecla para activar FastCrafting", Keyboard.KEY_SPACE, 1D, 255D, 1D);
-
     public FastCrafting() {
         super("FastCrafting", "Rellena y craftea instantáneamente usando la receta detectada", Category.TWEAKS);
-        addSetting(triggerKey);
         for (int i = 0; i < lastRecipe.length; i++) {
             lastRecipe[i] = ItemStack.EMPTY;
         }
@@ -36,14 +32,17 @@ public class FastCrafting extends Module {
     public void onUpdate() {
         if (mc.player == null || !(mc.currentScreen instanceof GuiCrafting) || !(mc.player.openContainer instanceof ContainerWorkbench)) {
             triggerPressed = false;
+            // Invalidate stale recipe when leaving crafting GUI
+            if (hasRecipe()) {
+                clearRecipe();
+            }
             return;
         }
 
         ContainerWorkbench container = (ContainerWorkbench) mc.player.openContainer;
         captureRecipeSnapshot(container);
 
-        int key = triggerKey.getValue().intValue();
-        boolean down = Keyboard.isKeyDown(key);
+        boolean down = Keyboard.isKeyDown(Keyboard.KEY_SPACE);
         if (!down) {
             triggerPressed = false;
             return;
@@ -212,6 +211,12 @@ public class FastCrafting extends Module {
             if (!lastRecipe[i].isEmpty()) return true;
         }
         return false;
+    }
+
+    private void clearRecipe() {
+        for (int i = 0; i < lastRecipe.length; i++) {
+            lastRecipe[i] = ItemStack.EMPTY;
+        }
     }
 
     private boolean isContainerStillValid(ContainerWorkbench baseline) {

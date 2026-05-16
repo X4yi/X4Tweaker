@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MobESP extends ESPBase {
+    private final List<Entity> cachedEntities = new ArrayList<Entity>();
     private final NumberSetting maxDistance = new NumberSetting("Max Distance", "Distancia maxima", 48.0D, 4.0D, 160.0D, 1.0D);
     private final BooleanSetting ignoreHostiles = new BooleanSetting("Ignore Hostiles", "Ignorar hostiles", false);
     private final BooleanSetting ignoreAnimals = new BooleanSetting("Ignore Animals", "Ignorar animales", false);
@@ -50,8 +51,8 @@ public class MobESP extends ESPBase {
 
     @Override
     protected List<Entity> getEntities() {
-        List<Entity> out = new ArrayList<Entity>();
-        if (mc.world == null || mc.player == null) return out;
+        cachedEntities.clear();
+        if (mc.world == null || mc.player == null) return cachedEntities;
 
         double maxDistSq = maxDistance.getValue() * maxDistance.getValue();
         List<Entity> loaded = mc.world.loadedEntityList;
@@ -61,9 +62,9 @@ public class MobESP extends ESPBase {
             if (e == mc.player || !e.isEntityAlive() || e.isDead) continue;
             if (mc.player.getDistanceSq(e) > maxDistSq) continue;
             if (!passesFilters((EntityLivingBase) e)) continue;
-            out.add(e);
+            cachedEntities.add(e);
         }
-        return out;
+        return cachedEntities;
     }
 
     private boolean passesFilters(EntityLivingBase entity) {
@@ -92,7 +93,7 @@ public class MobESP extends ESPBase {
     }
 
     @Override
-    protected float[] getColor() {
-        return new float[]{0.16f, 0.95f, 0.58f, 1.0f};
+    protected void fillColor(float[] out) {
+        out[0] = 0.16f; out[1] = 0.95f; out[2] = 0.58f; out[3] = 1.0f;
     }
 }

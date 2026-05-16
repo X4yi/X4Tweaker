@@ -108,12 +108,15 @@ x4tweaker.setting.killauralegit.skip_enderman.desc=Don't attack endermen
 x4tweaker.setting.killauralegit.ignore_list.name=Ignore List
 x4tweaker.setting.killauralegit.ignore_list.desc=Entity names to skip
 
-# === SETTINGS: FastCrafting ===
+# === CLICKGUI: Theme Editor ===
 
-x4tweaker.setting.fastcrafting.click_delay.name=Click Delay
-x4tweaker.setting.fastcrafting.click_delay.desc=Ticks between each inventory click
-x4tweaker.setting.fastcrafting.trigger_key.name=Trigger Key
-x4tweaker.setting.fastcrafting.trigger_key.desc=Key used to trigger instant crafting
+x4tweaker.clickgui.theme.select.title=Select a Color Slot
+x4tweaker.clickgui.theme.select.hint=Click one entry to edit it.
+x4tweaker.clickgui.theme.edit.title=Editing
+x4tweaker.clickgui.theme.edit.hint=Drag inside bars to adjust hue, saturation, brightness and alpha.
+x4tweaker.clickgui.theme.action.reset_all=Reset All
+x4tweaker.clickgui.theme.action.reset_slot=Reset Slot
+x4tweaker.clickgui.theme.action.save_back=Save & Back
 
 # === SETTINGS: BetterAFK ===
 

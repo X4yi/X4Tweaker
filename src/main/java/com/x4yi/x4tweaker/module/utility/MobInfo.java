@@ -48,6 +48,17 @@ public class MobInfo extends Module {
 
     private final Map<String, String> modNameCache = new HashMap<String, String>();
     private final List<EntityLivingBase> renderTargets = new ArrayList<EntityLivingBase>();
+    private final double[] sharedOffset = new double[3];
+    private final HeartLayout sharedHeartLayout = new HeartLayout();
+    private final String[] armorCache = new String[31];
+
+    private String getArmorString(int armor) {
+        if (armor >= 0 && armor <= 30) {
+            if (armorCache[armor] == null) armorCache[armor] = "[" + armor + " armor]";
+            return armorCache[armor];
+        }
+        return "[" + armor + " armor]";
+    }
 
     public MobInfo() {
         super("MobInfo", "Informacion flotante de entidades", Category.UTILITY);
@@ -88,12 +99,23 @@ public class MobInfo extends Module {
         if (throughWalls.getValue()) GlStateManager.disableDepth();
         else GlStateManager.enableDepth();
 
+        Entity viewEntity = mc.getRenderViewEntity();
+        if (viewEntity == null) viewEntity = mc.player;
+
         for (int i = 0, size = renderTargets.size(); i < size; i++) {
             EntityLivingBase entity = renderTargets.get(i);
             if (!isRenderable(entity)) continue;
-            double distSq = mc.player.getDistanceSq(entity);
+            double distSq = viewEntity.getDistanceSq(entity);
             if (distSq > maxDistSq) continue;
-            if (lineOfSightOnly.getValue() && !mc.player.canEntityBeSeen(entity)) continue;
+            
+            boolean seen = false;
+            if (viewEntity instanceof EntityLivingBase) {
+                seen = ((EntityLivingBase) viewEntity).canEntityBeSeen(entity);
+            } else {
+                seen = mc.player.canEntityBeSeen(entity);
+            }
+            if (lineOfSightOnly.getValue() && !seen) continue;
+            
             renderEntityInfo(entity, partial, (float) Math.sqrt(distSq));
         }
 
@@ -118,8 +140,23 @@ public class MobInfo extends Module {
         final double crossRange = crosshairRange.getValue();
         final double cosMaxAngle = Math.cos(Math.toRadians(crossRange));
 
-        Vec3d eyes = mc.player.getPositionEyes(mc.getRenderPartialTicks());
-        Vec3d look = mc.player.getLook(mc.getRenderPartialTicks());
+        Entity viewEntity = mc.getRenderViewEntity();
+        if (viewEntity == null) viewEntity = mc.player;
+
+        final float partial = mc.getRenderPartialTicks();
+        double eyeX = lerp(viewEntity.lastTickPosX, viewEntity.posX, partial);
+        double eyeY = lerp(viewEntity.lastTickPosY, viewEntity.posY, partial) + viewEntity.getEyeHeight();
+        double eyeZ = lerp(viewEntity.lastTickPosZ, viewEntity.posZ, partial);
+
+        float yaw = viewEntity.prevRotationYaw + (viewEntity.rotationYaw - viewEntity.prevRotationYaw) * partial;
+        float pitch = viewEntity.prevRotationPitch + (viewEntity.rotationPitch - viewEntity.prevRotationPitch) * partial;
+        float f = net.minecraft.util.math.MathHelper.cos(-yaw * 0.017453292F - (float)Math.PI);
+        float f1 = net.minecraft.util.math.MathHelper.sin(-yaw * 0.017453292F - (float)Math.PI);
+        float f2 = -net.minecraft.util.math.MathHelper.cos(-pitch * 0.017453292F);
+        float f3 = net.minecraft.util.math.MathHelper.sin(-pitch * 0.017453292F);
+        double lookX = f1 * f2;
+        double lookY = f3;
+        double lookZ = f * f2;
 
         List<Entity> loaded = mc.world.loadedEntityList;
         for (int i = 0, size = loaded.size(); i < size; i++) {
@@ -128,11 +165,11 @@ public class MobInfo extends Module {
             EntityLivingBase living = (EntityLivingBase) e;
             if (!isRenderable(living)) continue;
 
-            double distSq = mc.player.getDistanceSq(living);
+            double distSq = viewEntity.getDistanceSq(living);
             if (distSq > maxDistSq) continue;
 
             if ("CROSSHAIR_NEAR".equals(mode)) {
-                double dot = dotToEntity(eyes, look, living, mc.getRenderPartialTicks());
+                double dot = dotToEntity(eyeX, eyeY, eyeZ, lookX, lookY, lookZ, living, partial);
                 if (dot < cosMaxAngle) continue;
             }
 
@@ -140,12 +177,16 @@ public class MobInfo extends Module {
         }
     }
 
-    private static double dotToEntity(Vec3d eyes, Vec3d look, EntityLivingBase entity, float partialTicks) {
+    private static double dotToEntity(double eyeX, double eyeY, double eyeZ, double lookX, double lookY, double lookZ, EntityLivingBase entity, float partialTicks) {
         double ex = lerp(entity.lastTickPosX, entity.posX, partialTicks);
         double ey = lerp(entity.lastTickPosY, entity.posY, partialTicks) + entity.height * 0.5D;
         double ez = lerp(entity.lastTickPosZ, entity.posZ, partialTicks);
-        Vec3d dir = new Vec3d(ex - eyes.x, ey - eyes.y, ez - eyes.z).normalize();
-        return look.dotProduct(dir);
+        double dx = ex - eyeX;
+        double dy = ey - eyeY;
+        double dz = ez - eyeZ;
+        double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (len > 0) { dx /= len; dy /= len; dz /= len; }
+        return lookX * dx + lookY * dy + lookZ * dz;
     }
 
     private EntityLivingBase getLookedLiving() {
@@ -194,8 +235,9 @@ public class MobInfo extends Module {
         int width = Math.max(fr.getStringWidth(name), fr.getStringWidth(modName));
         int heartsWidth = hearts.heartsInFirstRow * HEART_WIDTH;
         if (heartsWidth > width) width = heartsWidth;
+        int aw = 0;
         if (armor > 0) {
-            int aw = fr.getStringWidth("[" + armor + " armor]");
+            aw = fr.getStringWidth(getArmorString(armor));
             if (aw > width) width = aw;
         }
 
@@ -230,7 +272,7 @@ public class MobInfo extends Module {
         }
 
         if (armor > 0) {
-            String armorLine = "[" + armor + " armor]";
+            String armorLine = getArmorString(armor);
             fr.drawStringWithShadow(armorLine, -fr.getStringWidth(armorLine) / 2.0F, yDraw, color);
         }
 
@@ -308,7 +350,7 @@ public class MobInfo extends Module {
         GL11.glEnd();
     }
 
-    private static HeartLayout buildHeartLayout(float health, float maxHealth) {
+    private HeartLayout buildHeartLayout(float health, float maxHealth) {
         int totalHearts = Math.max(1, (int) Math.ceil(maxHealth / 2.0F));
         int fullHearts = (int) Math.floor(health / 2.0F);
         boolean hasHalf = ((int) Math.ceil(health)) % 2 != 0;
@@ -316,7 +358,8 @@ public class MobInfo extends Module {
         int heartsInFirstRow = Math.min(HEARTS_PER_ROW, totalHearts);
         int halfGlobal = hasHalf ? fullHearts : -1;
         int halfRow = hasHalf && fullHearts < HEARTS_PER_ROW ? fullHearts : -1;
-        return new HeartLayout(totalHearts, fullHearts, halfGlobal, halfRow, rows, heartsInFirstRow);
+        sharedHeartLayout.update(totalHearts, fullHearts, halfGlobal, halfRow, rows, heartsInFirstRow);
+        return sharedHeartLayout;
     }
 
     private float getFadeAlpha(float distance) {
@@ -355,16 +398,17 @@ public class MobInfo extends Module {
     private double[] getOffset(EntityLivingBase entity) {
         String location = renderLocation.getValue();
         if ("CUSTOM_OFFSET".equals(location)) {
-            return new double[]{customOffsetX.getValue(), customOffsetY.getValue(), customOffsetZ.getValue()};
+            sharedOffset[0] = customOffsetX.getValue(); sharedOffset[1] = customOffsetY.getValue(); sharedOffset[2] = customOffsetZ.getValue();
+            return sharedOffset;
         }
 
         double w = entity.width * 0.7D;
         double h = Math.max(0.1D, entity.height);
-        if ("TOP".equals(location)) return new double[]{0D, h + 0.35D, 0D};
-        if ("SIDE_LEFT".equals(location)) return new double[]{-w, h * 0.7D, 0D};
-        if ("SIDE_RIGHT".equals(location)) return new double[]{w, h * 0.7D, 0D};
-        if ("DIAGONAL".equals(location)) return new double[]{w * 0.7D, h * 0.8D, w * 0.7D};
-        return new double[]{0D, h + 0.35D, 0D};
+        if ("TOP".equals(location)) { sharedOffset[0] = 0D; sharedOffset[1] = h + 0.35D; sharedOffset[2] = 0D; return sharedOffset; }
+        if ("SIDE_LEFT".equals(location)) { sharedOffset[0] = -w; sharedOffset[1] = h * 0.7D; sharedOffset[2] = 0D; return sharedOffset; }
+        if ("SIDE_RIGHT".equals(location)) { sharedOffset[0] = w; sharedOffset[1] = h * 0.7D; sharedOffset[2] = 0D; return sharedOffset; }
+        if ("DIAGONAL".equals(location)) { sharedOffset[0] = w * 0.7D; sharedOffset[1] = h * 0.8D; sharedOffset[2] = w * 0.7D; return sharedOffset; }
+        sharedOffset[0] = 0D; sharedOffset[1] = h + 0.35D; sharedOffset[2] = 0D; return sharedOffset;
     }
 
     private static void drawRect(float left, float top, float right, float bottom, int color) {
@@ -384,14 +428,14 @@ public class MobInfo extends Module {
     }
 
     private static class HeartLayout {
-        private final int totalHearts;
-        private final int filledHearts;
-        private final int halfHeartGlobalIndex;
-        private final int halfHeartIndexInRow;
-        private final int rows;
-        private final int heartsInFirstRow;
+        private int totalHearts;
+        private int filledHearts;
+        private int halfHeartGlobalIndex;
+        private int halfHeartIndexInRow;
+        private int rows;
+        private int heartsInFirstRow;
 
-        private HeartLayout(int totalHearts, int filledHearts, int halfHeartGlobalIndex, int halfHeartIndexInRow, int rows, int heartsInFirstRow) {
+        private void update(int totalHearts, int filledHearts, int halfHeartGlobalIndex, int halfHeartIndexInRow, int rows, int heartsInFirstRow) {
             this.totalHearts = totalHearts;
             this.filledHearts = filledHearts;
             this.halfHeartGlobalIndex = halfHeartGlobalIndex;

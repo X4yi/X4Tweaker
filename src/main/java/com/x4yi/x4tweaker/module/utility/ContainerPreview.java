@@ -10,6 +10,8 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -34,6 +36,20 @@ public class ContainerPreview extends Module {
     private final PreviewState state = new PreviewState();
     private final SnapshotCollector collector = new SnapshotCollector();
     private long worldTick;
+    private ScaledResolution cachedRes;
+    private int lastW, lastH, lastScale;
+    private final int[] resolvedPos = new int[2];
+
+    private ScaledResolution getRes() {
+        int w = mc.displayWidth;
+        int h = mc.displayHeight;
+        int s = mc.gameSettings.guiScale;
+        if (cachedRes == null || w != lastW || h != lastH || s != lastScale) {
+            cachedRes = new ScaledResolution(mc);
+            lastW = w; lastH = h; lastScale = s;
+        }
+        return cachedRes;
+    }
 
     public ContainerPreview() {
         super("ContainerPreview", "Preview visual de contenedores", Category.UTILITY);
@@ -106,7 +122,7 @@ public class ContainerPreview extends Module {
     }
 
     private void renderPreview() {
-        ScaledResolution sr = new ScaledResolution(mc);
+        ScaledResolution sr = getRes();
         int sw = sr.getScaledWidth();
         int sh = sr.getScaledHeight();
 
@@ -204,7 +220,9 @@ public class ContainerPreview extends Module {
         if (x + scaledW > screenW - 2) x = screenW - scaledW - 2;
         if (y + scaledH > screenH - 2) y = screenH - scaledH - 2;
 
-        return new int[]{x, y};
+        resolvedPos[0] = x;
+        resolvedPos[1] = y;
+        return resolvedPos;
     }
 
     private static int rgba(int r, int g, int b, int a) {
@@ -273,20 +291,21 @@ public class ContainerPreview extends Module {
             out.rows = 0;
             out.cols = 0;
             out.slotCount = 0;
-            out.title = DEFAULT_TITLE;
+            out.title = resolveTitle(te);
+
+            if (te instanceof IInventory) {
+                IInventory inv = (IInventory) te;
+                if (collectFromInventory(inv, out)) {
+                    out.valid = true;
+                    return;
+                }
+            }
 
             if (te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
                 IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
                 if (handler != null && collectFromHandler(handler, te, out)) {
                     out.valid = true;
                     return;
-                }
-            }
-
-            if (te instanceof IInventory) {
-                IInventory inv = (IInventory) te;
-                if (collectFromInventory(inv, out)) {
-                    out.valid = true;
                 }
             }
         }
@@ -324,9 +343,17 @@ public class ContainerPreview extends Module {
         }
 
         private String resolveTitle(TileEntity te) {
-            if (!(te instanceof IInventory)) return DEFAULT_TITLE;
-            IInventory inv = (IInventory) te;
-            return sanitizeTitle(inv.getDisplayName() == null ? null : inv.getDisplayName().getFormattedText());
+            if (te instanceof IInventory) {
+                IInventory inv = (IInventory) te;
+                String title = inv.getDisplayName() == null ? null : inv.getDisplayName().getFormattedText();
+                if (title != null && !title.trim().isEmpty()) return sanitizeTitle(title);
+            }
+            if (te.getBlockType() != null && te.getBlockType() != Blocks.AIR) {
+                try {
+                    return sanitizeTitle(I18n.format(te.getBlockType().getUnlocalizedName() + ".name"));
+                } catch (Exception ignored) {}
+            }
+            return DEFAULT_TITLE;
         }
 
         private String sanitizeTitle(String title) {
@@ -337,6 +364,7 @@ public class ContainerPreview extends Module {
         private void fillLayout(PreviewState state, int size) {
             int cols;
             if (size <= 5) cols = size;
+            else if (size == 27 || size == 54) cols = 9;
             else if (size <= 12 && size % 3 == 0) cols = 3;
             else if (size % 9 == 0) cols = 9;
             else if (size % 6 == 0) cols = 6;

@@ -21,10 +21,10 @@ public class ThemeManager {
     private boolean enablePause = true;
 
     private static final String[] COLOR_NAMES = {
-        "Button Normal", "Button Dark",
-        "Toggle On", "Toggle On Dark",
-        "Toggle Off", "Toggle Off Dark",
-        "Background", "Background Border"
+        "Primary Button", "Primary Button Shade",
+        "Toggle Enabled", "Toggle Enabled Shade",
+        "Toggle Disabled", "Toggle Disabled Shade",
+        "Panel Background", "Panel Border"
     };
 
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -131,6 +131,20 @@ public class ThemeManager {
             case 5: colorToggleApagadoOscuro = c; break;
             case 6: colorFondo = c; break;
             case 7: colorFondoBorde = c; break;
+        }
+    }
+
+    public Color getDefaultColorByIndex(int index) {
+        switch (index) {
+            case 0: return new Color(75, 0, 130, 200);
+            case 1: return new Color(48, 0, 84, 200);
+            case 2: return new Color(0, 180, 80);
+            case 3: return new Color(0, 120, 50);
+            case 4: return new Color(150, 150, 150);
+            case 5: return new Color(100, 100, 100);
+            case 6: return new Color(15, 15, 15, 230);
+            case 7: return new Color(30, 30, 30, 255);
+            default: return Color.WHITE;
         }
     }
 

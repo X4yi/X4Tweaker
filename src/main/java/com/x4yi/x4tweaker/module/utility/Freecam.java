@@ -4,11 +4,14 @@ import com.x4yi.x4tweaker.module.Category;
 import com.x4yi.x4tweaker.module.Module;
 import com.x4yi.x4tweaker.setting.BooleanSetting;
 import com.x4yi.x4tweaker.setting.NumberSetting;
+import com.x4yi.x4tweaker.utils.camera.DetachedCameraRenderUtil;
 import com.x4yi.x4tweaker.utils.camera.FakeCameraEntity;
 import com.x4yi.x4tweaker.utils.camera.RaytraceUtil;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.MovementInput;
 import net.minecraftforge.client.event.InputUpdateEvent;
-import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -26,7 +29,9 @@ public class Freecam extends Module {
 
     private FakeCameraEntity fakeEntity;
     private static final int ENTITY_ID = -42069;
-    private boolean prevThirdPerson;
+    private int prevThirdPersonView;
+    private Entity overlayBackupViewEntity;
+    private final MovementInput freecamInput = new MovementInput();
 
     public Freecam() {
         super("Freecam", "Cámara libre estilo espectador.", Category.UTILITY);
@@ -48,8 +53,7 @@ public class Freecam extends Module {
             return;
         }
 
-        prevThirdPerson = mc.gameSettings.thirdPersonView != 0;
-        if (prevThirdPerson) mc.gameSettings.thirdPersonView = 0;
+        prevThirdPersonView = mc.gameSettings.thirdPersonView;
 
         fakeEntity = new FakeCameraEntity();
         mc.world.addEntityToWorld(ENTITY_ID, fakeEntity);
@@ -60,11 +64,14 @@ public class Freecam extends Module {
     public void onDisable() {
         if (mc.player != null) {
             mc.setRenderViewEntity(mc.player);
-            if (prevThirdPerson) mc.gameSettings.thirdPersonView = 1;
+            if (mc.gameSettings.thirdPersonView != prevThirdPersonView) {
+                mc.gameSettings.thirdPersonView = prevThirdPersonView;
+            }
         }
         if (mc.world != null) {
             mc.world.removeEntityFromWorld(ENTITY_ID);
         }
+        overlayBackupViewEntity = null;
         fakeEntity = null;
     }
 
@@ -75,22 +82,25 @@ public class Freecam extends Module {
             return;
         }
 
-        MovementInput input = new MovementInput();
-        input.forwardKeyDown = Keyboard.isKeyDown(mc.gameSettings.keyBindForward.getKeyCode());
-        input.backKeyDown = Keyboard.isKeyDown(mc.gameSettings.keyBindBack.getKeyCode());
-        input.leftKeyDown = Keyboard.isKeyDown(mc.gameSettings.keyBindLeft.getKeyCode());
-        input.rightKeyDown = Keyboard.isKeyDown(mc.gameSettings.keyBindRight.getKeyCode());
-        input.jump = Keyboard.isKeyDown(mc.gameSettings.keyBindJump.getKeyCode());
-        input.sneak = Keyboard.isKeyDown(mc.gameSettings.keyBindSneak.getKeyCode());
+        freecamInput.moveForward = 0.0F;
+        freecamInput.moveStrafe = 0.0F;
+        freecamInput.forwardKeyDown = Keyboard.isKeyDown(mc.gameSettings.keyBindForward.getKeyCode());
+        freecamInput.backKeyDown = Keyboard.isKeyDown(mc.gameSettings.keyBindBack.getKeyCode());
+        freecamInput.leftKeyDown = Keyboard.isKeyDown(mc.gameSettings.keyBindLeft.getKeyCode());
+        freecamInput.rightKeyDown = Keyboard.isKeyDown(mc.gameSettings.keyBindRight.getKeyCode());
+        freecamInput.jump = Keyboard.isKeyDown(mc.gameSettings.keyBindJump.getKeyCode());
+        freecamInput.sneak = Keyboard.isKeyDown(mc.gameSettings.keyBindSneak.getKeyCode());
 
-        if (input.forwardKeyDown) input.moveForward++;
-        if (input.backKeyDown) input.moveForward--;
-        if (input.leftKeyDown) input.moveStrafe++;
-        if (input.rightKeyDown) input.moveStrafe--;
+        if (freecamInput.forwardKeyDown) freecamInput.moveForward++;
+        if (freecamInput.backKeyDown) freecamInput.moveForward--;
+        if (freecamInput.leftKeyDown) freecamInput.moveStrafe++;
+        if (freecamInput.rightKeyDown) freecamInput.moveStrafe--;
+
+        mc.gameSettings.thirdPersonView = 0;
 
         boolean isSprinting = Keyboard.isKeyDown(mc.gameSettings.keyBindSprint.getKeyCode());
 
-        fakeEntity.moveCamera(input, speed.getValue().floatValue(), verticalSpeed.getValue().floatValue(), isSprinting);
+        fakeEntity.moveCamera(freecamInput, speed.getValue().floatValue(), verticalSpeed.getValue().floatValue(), isSprinting);
     }
 
     @SubscribeEvent
@@ -122,18 +132,12 @@ public class Freecam extends Module {
                 int dy = org.lwjgl.input.Mouse.getDY();
 
                 if (dx != 0 || dy != 0) {
-                    float f = mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;
-                    float f1 = f * f * f * 8.0F;
-                    float f2 = (float)dx * f1;
-                    float f3 = (float)dy * f1;
-                    int i = mc.gameSettings.invertMouse ? -1 : 1;
+                    float[] delta = com.x4yi.x4tweaker.utils.camera.CameraUtil.calculateMouseDelta(dx, dy);
 
-
-                    fakeEntity.turn(f2, f3 * (float)i);
-
+                    fakeEntity.turn(delta[0], delta[1]);
 
                     if (!freezeRotations.getValue()) {
-                        mc.player.turn(f2, f3 * (float)i);
+                        mc.player.turn(delta[0], delta[1]);
                     }
                 }
             }
@@ -141,13 +145,53 @@ public class Freecam extends Module {
         }
     }
 
+    private boolean isRenderingPlayer = false;
+
     @SubscribeEvent
-    public void onRenderWorld(RenderWorldLastEvent event) {
-        if (fakeEntity != null && renderPlayer.getValue() && mc.player != null) {
-            net.minecraft.entity.Entity backup = mc.getRenderManager().renderViewEntity;
-            mc.getRenderManager().renderViewEntity = mc.player;
-            mc.getRenderManager().renderEntityStatic(mc.player, event.getPartialTicks(), false);
-            mc.getRenderManager().renderViewEntity = backup;
+    public void onRenderPlayerPre(RenderPlayerEvent.Pre event) {
+        if (fakeEntity == null || mc.player == null) return;
+        if (!isDetachedActive()) return;
+        if (event.getEntityPlayer() == fakeEntity) {
+            event.setCanceled(true);
+            return;
         }
+        if (event.getEntityPlayer() == mc.player && !isRenderingPlayer) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public void onOverlayPre(RenderGameOverlayEvent.Pre event) {
+        if (!isDetachedActive()) return;
+        if (overlayBackupViewEntity != null) return;
+        overlayBackupViewEntity = mc.getRenderViewEntity();
+        mc.setRenderViewEntity(mc.player);
+    }
+
+    @SubscribeEvent
+    public void onOverlayPost(RenderGameOverlayEvent.Post event) {
+        if (overlayBackupViewEntity == null) return;
+        mc.setRenderViewEntity(overlayBackupViewEntity);
+        overlayBackupViewEntity = null;
+    }
+
+    @SubscribeEvent
+    public void onRenderWorldLast(RenderWorldLastEvent event) {
+        if (!renderPlayer.getValue()) return;
+        if (!isDetachedActive()) return;
+        isRenderingPlayer = true;
+        DetachedCameraRenderUtil.renderLocalPlayerOpaque(mc, event.getPartialTicks());
+        isRenderingPlayer = false;
+    }
+
+    @SubscribeEvent
+    public void onRenderHand(net.minecraftforge.client.event.RenderHandEvent event) {
+        if (fakeEntity != null) {
+            event.setCanceled(true);
+        }
+    }
+
+    private boolean isDetachedActive() {
+        return mc != null && mc.player != null && fakeEntity != null && mc.getRenderViewEntity() == fakeEntity;
     }
 }

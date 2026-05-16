@@ -16,10 +16,6 @@ public class FakeCameraEntity extends EntityOtherPlayerMP {
         this.rotationYawHead = mc.player.rotationYawHead;
         this.renderYawOffset = mc.player.renderYawOffset;
 
-
-        this.inventory.copyInventory(mc.player.inventory);
-
-
         this.noClip = true;
         this.stepHeight = 0.0F;
 

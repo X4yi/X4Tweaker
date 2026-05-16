@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = 'r1.0'
+version = 'r1.0.1'
 group = 'com.x4yi.x4tweaker'
 archivesBaseName = 'x4tweaker'
 

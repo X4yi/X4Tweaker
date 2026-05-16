@@ -49,4 +49,23 @@ public class CameraUtil {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Calculates mouse delta scaled by Minecraft's sensitivity settings.
+     * Returns {scaledDX, scaledDY} respecting invert mouse setting.
+     * Extracted from Freecam/CameraDetach to eliminate duplication.
+     *
+     * @param rawDX raw mouse delta X from Mouse.getDX()
+     * @param rawDY raw mouse delta Y from Mouse.getDY()
+     * @return float[2] with {scaledDX, scaledDY} (invert-mouse already applied to DY)
+     */
+    public static float[] calculateMouseDelta(int rawDX, int rawDY) {
+        Minecraft mc = Minecraft.getMinecraft();
+        float f = mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;
+        float sensitivity = f * f * f * 8.0F;
+        float scaledDX = (float) rawDX * sensitivity;
+        float scaledDY = (float) rawDY * sensitivity;
+        int invert = mc.gameSettings.invertMouse ? -1 : 1;
+        return new float[]{scaledDX, scaledDY * (float) invert};
+    }
 }

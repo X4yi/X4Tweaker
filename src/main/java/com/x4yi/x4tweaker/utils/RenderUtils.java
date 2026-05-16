@@ -131,18 +131,11 @@ public final class RenderUtils {
         GlStateManager.popMatrix();
     }
 
-    public static void dibujarRect(float x, float y, float w, float h, int color) {
-        drawRect(x, y, w, h, color);
-    }
 
-    public static void dibujarRectGradienteHorizontal(float x, float y, float w, float h, int color1, int color2) {
-        drawGradientRectHorizontal(x, y, w, h, color1, color2);
-    }
-
-    public static void dibujarRectBordeado(float x, float y, float w, float h, float lineWidth, int lineColor, int bgColor) {
-        drawBorderedRect(x, y, w, h, lineWidth, lineColor, bgColor);
-    }
-
+    /**
+     * Rounded rect with batched GL state — sets up GL once, draws all geometry, restores once.
+     * Avoids the 12+ redundant GL state toggles from calling drawRect/drawArcFill internally.
+     */
     public static void drawRoundedRect(float x, float y, float w, float h, float radius, int color) {
         float[] c = unpackColor(color);
         GlStateManager.pushMatrix();
@@ -153,33 +146,61 @@ public final class RenderUtils {
             GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
         );
         GlStateManager.color(c[0], c[1], c[2], c[3]);
+        GL11.glEnable(GL11.GL_POINT_SMOOTH);
 
         Tessellator tess = Tessellator.getInstance();
         BufferBuilder buf = tess.getBuffer();
 
+        // Center rect
+        buf.begin(7, DefaultVertexFormats.POSITION);
+        buf.pos(x + radius, h, 0.0).endVertex();
+        buf.pos(w - radius, h, 0.0).endVertex();
+        buf.pos(w - radius, y, 0.0).endVertex();
+        buf.pos(x + radius, y, 0.0).endVertex();
+        tess.draw();
 
-        drawRect(x + radius, y, w - radius, h, color);
+        // Left side rect
+        buf.begin(7, DefaultVertexFormats.POSITION);
+        buf.pos(x, h - radius, 0.0).endVertex();
+        buf.pos(x + radius, h - radius, 0.0).endVertex();
+        buf.pos(x + radius, y + radius, 0.0).endVertex();
+        buf.pos(x, y + radius, 0.0).endVertex();
+        tess.draw();
 
-        drawRect(x, y + radius, x + radius, h - radius, color);
-        drawRect(w - radius, y + radius, w, h - radius, color);
+        // Right side rect
+        buf.begin(7, DefaultVertexFormats.POSITION);
+        buf.pos(w - radius, h - radius, 0.0).endVertex();
+        buf.pos(w, h - radius, 0.0).endVertex();
+        buf.pos(w, y + radius, 0.0).endVertex();
+        buf.pos(w - radius, y + radius, 0.0).endVertex();
+        tess.draw();
 
-
-        GL11.glEnable(GL11.GL_POINT_SMOOTH);
+        // Corner arcs (reusing existing GL state)
         int segments = 8;
-        GlStateManager.color(c[0], c[1], c[2], c[3]);
+        drawArcFillRaw(buf, tess, x + radius, y + radius, radius, 180, 270, segments);
+        drawArcFillRaw(buf, tess, w - radius, y + radius, radius, 270, 360, segments);
+        drawArcFillRaw(buf, tess, x + radius, h - radius, radius, 90, 180, segments);
+        drawArcFillRaw(buf, tess, w - radius, h - radius, radius, 0, 90, segments);
 
-        drawArcFill(x + radius, y + radius, radius, 180, 270, segments, color);
-
-        drawArcFill(w - radius, y + radius, radius, 270, 360, segments, color);
-
-        drawArcFill(x + radius, h - radius, radius, 90, 180, segments, color);
-
-        drawArcFill(w - radius, h - radius, radius, 0, 90, segments, color);
         GL11.glDisable(GL11.GL_POINT_SMOOTH);
-
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
         GlStateManager.popMatrix();
+    }
+
+    /**
+     * Arc fill without GL state management — caller is responsible for GL setup/teardown.
+     */
+    private static void drawArcFillRaw(BufferBuilder buf, Tessellator tess,
+                                        float cx, float cy, float radius,
+                                        int startAngle, int endAngle, int segments) {
+        buf.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION);
+        buf.pos(cx, cy, 0.0).endVertex();
+        for (int i = 0; i <= segments; i++) {
+            double angle = Math.toRadians(startAngle + (endAngle - startAngle) * i / (double) segments);
+            buf.pos(cx + Math.cos(angle) * radius, cy - Math.sin(angle) * radius, 0.0).endVertex();
+        }
+        tess.draw();
     }
 
     private static void drawArcFill(float cx, float cy, float radius, int startAngle, int endAngle, int segments, int color) {

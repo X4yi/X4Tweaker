@@ -11,38 +11,54 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChestESP extends ESPBase {
+    private final List<Entity> cachedEntities = new ArrayList<>();
+
     public ChestESP() {
         super("ChestESP", "Dibuja cajas alrededor de cofres");
     }
 
     @Override
     protected List<Entity> getEntities() {
-        List<Entity> chests = new ArrayList<>();
-        if (mc.world == null) return chests;
+        cachedEntities.clear();
+        if (mc.world == null) return cachedEntities;
         List<Entity> loaded = mc.world.loadedEntityList;
         for (int i = 0, size = loaded.size(); i < size; i++) {
             Entity e = loaded.get(i);
-            if (e instanceof EntityMinecartChest) chests.add(e);
+            if (e instanceof EntityMinecartChest) cachedEntities.add(e);
         }
-        return chests;
+        return cachedEntities;
     }
 
+    /**
+     * Unified render: entity ESPs + TileEntity chests in a single GL state block.
+     * This avoids the double pushRenderState/popRenderState that the original had.
+     */
     @Override
     public void onRender3D() {
         if (mc.player == null || mc.world == null) return;
 
-        super.onRender3D();
-
-        float[] color = getColor();
+        fillColor(cachedColor);
         String currentStyle = style.getValue();
         boolean drawLines = currentStyle.equals("Lines") || currentStyle.equals("Lines&Boxes");
         boolean drawBoxes = currentStyle.equals("Boxes") || currentStyle.equals("Lines&Boxes");
 
+        // Check if there's anything to render at all
+        List<Entity> entities = getEntities();
         List<TileEntity> tileEntities = mc.world.loadedTileEntityList;
-        if (tileEntities.isEmpty()) return;
+        boolean hasEntities = !entities.isEmpty();
+        boolean hasTiles = !tileEntities.isEmpty();
+        if (!hasEntities && !hasTiles) return;
 
         pushRenderState();
 
+        // Render minecart chests (entity-based)
+        for (int i = 0, size = entities.size(); i < size; i++) {
+            Entity entity = entities.get(i);
+            if (entity == mc.player) continue;
+            renderEntity(entity, cachedColor, drawLines, drawBoxes);
+        }
+
+        // Render tile entity chests in the same GL state block
         for (int i = 0, size = tileEntities.size(); i < size; i++) {
             TileEntity te = tileEntities.get(i);
             if (!(te instanceof TileEntityChest)) continue;
@@ -53,14 +69,14 @@ public class ChestESP extends ESPBase {
             double z = pos.getZ() - mc.getRenderManager().viewerPosZ;
 
             AxisAlignedBB bb = new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1);
-            renderBounds(bb, color, drawLines, drawBoxes);
+            renderBounds(bb, cachedColor, drawLines, drawBoxes);
         }
 
         popRenderState();
     }
 
     @Override
-    protected float[] getColor() {
-        return new float[]{1.0f, 0.64f, 0.0f, 1.0f};
+    protected void fillColor(float[] out) {
+        out[0] = 1.0f; out[1] = 0.64f; out[2] = 0.0f; out[3] = 1.0f;
     }
 }

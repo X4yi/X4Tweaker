@@ -50,6 +50,7 @@ public class BetterAFK extends Module implements BotModule {
     private final Supplier<Boolean> isStrafeVisible = () -> autoDefend.getValue() && strafeInCombat.getValue();
 
     private AFKBotTask currentTask = null;
+    private List<Class<? extends Module>> cachedIncompatibilities = null;
 
     public BetterAFK() {
         super("BetterAFK", "Bot AFK inteligente: come y se defiende solo", Category.BOTS);
@@ -118,6 +119,7 @@ public class BetterAFK extends Module implements BotModule {
 
     @Override
     public List<Class<? extends Module>> getIncompatibilities() {
+        if (cachedIncompatibilities != null) return cachedIncompatibilities;
         List<Class<? extends Module>> list = new ArrayList<>();
         list.add(KillAuraLegit.class);
         List<Module> modules = X4TweakerClient.getInstance().getModuleManager().getModules();
@@ -127,7 +129,8 @@ public class BetterAFK extends Module implements BotModule {
                 list.add(m.getClass());
             }
         }
-        return Collections.unmodifiableList(list);
+        cachedIncompatibilities = Collections.unmodifiableList(list);
+        return cachedIncompatibilities;
     }
 
     public int getCheckInterval()       { return checkInterval.getValue().intValue(); }

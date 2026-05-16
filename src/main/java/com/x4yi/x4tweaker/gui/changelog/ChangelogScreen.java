@@ -62,9 +62,9 @@ public class ChangelogScreen extends GuiScreen {
         int x2 = this.width - 20;
         int y2 = this.height - 20;
 
-        RenderUtils.dibujarRectBordeado(x1 - 1, y1 - 1, x2 + 1, y2 + 1, 1.0f, 0xFF303030, 0x00000000);
-        RenderUtils.dibujarRect(x1, y1, x2, y2, 0xE0151515);
-        RenderUtils.dibujarRectGradienteHorizontal(x1, y1, x2, y1 + 22, 0xFF2A2A2A, 0xFF383838);
+        RenderUtils.drawBorderedRect(x1 - 1, y1 - 1, x2 + 1, y2 + 1, 1.0f, 0xFF303030, 0x00000000);
+        RenderUtils.drawRect(x1, y1, x2, y2, 0xE0151515);
+        RenderUtils.drawGradientRectHorizontal(x1, y1, x2, y1 + 22, 0xFF2A2A2A, 0xFF383838);
 
         mc.fontRenderer.drawStringWithShadow("Changelog " + X4Tweaker.VERSION, x1 + 8, y1 + 7, 0xFFFFFFFF);
 
@@ -76,7 +76,7 @@ public class ChangelogScreen extends GuiScreen {
         int contentW = (x2 - x1) - 20;
         int contentH = (y2 - y1) - 38;
 
-        RenderUtils.dibujarRect(contentX - 2, contentY - 2, contentX + contentW + 2, contentY + contentH + 2, 0x33000000);
+        RenderUtils.drawRect(contentX - 2, contentY - 2, contentX + contentW + 2, contentY + contentH + 2, 0x33000000);
 
         if ("loading".equals(state)) {
             mc.fontRenderer.drawStringWithShadow("Loading changelog from GitHub...", contentX, contentY + 6, 0xFFAAAAAA);

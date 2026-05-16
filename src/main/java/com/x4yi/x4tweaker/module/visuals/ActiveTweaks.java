@@ -7,6 +7,7 @@ import com.x4yi.x4tweaker.module.Module;
 import com.x4yi.x4tweaker.module.bots.BotModule;
 import com.x4yi.x4tweaker.setting.BooleanSetting;
 import com.x4yi.x4tweaker.setting.ModeSetting;
+import com.x4yi.x4tweaker.utils.I18nUtils;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.resources.I18n;
 
@@ -23,7 +24,7 @@ public class ActiveTweaks extends Module {
         super("ActiveTweaks", "Muestra los módulos activos en pantalla", Category.UTILITY);
         addSetting(position);
         addSetting(showLogo);
-        if (!isEnabled()) toggle();
+        setDefaultEnabled(true);
     }
 
     @Override
@@ -90,12 +91,7 @@ public class ActiveTweaks extends Module {
     }
 
     private String normalizeKey(String input) {
-        String normalized = input.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "_");
-        int start = 0;
-        int end = normalized.length();
-        while (start < end && normalized.charAt(start) == '_') start++;
-        while (end > start && normalized.charAt(end - 1) == '_') end--;
-        return normalized.substring(start, end);
+        return I18nUtils.normalizeKey(input);
     }
 
     private static final class BotStatusEntry {

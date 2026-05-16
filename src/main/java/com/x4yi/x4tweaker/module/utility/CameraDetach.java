@@ -4,10 +4,15 @@ import com.x4yi.x4tweaker.module.Category;
 import com.x4yi.x4tweaker.module.Module;
 import com.x4yi.x4tweaker.setting.ModeSetting;
 import com.x4yi.x4tweaker.setting.NumberSetting;
+import com.x4yi.x4tweaker.utils.camera.DetachedCameraRenderUtil;
 import com.x4yi.x4tweaker.utils.camera.FakeCameraEntity;
 import com.x4yi.x4tweaker.utils.camera.RaytraceUtil;
+import net.minecraft.entity.Entity;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
@@ -23,7 +28,8 @@ public class CameraDetach extends Module {
 
     private FakeCameraEntity fakeEntity;
     private static final int ENTITY_ID = -42070;
-    private boolean prevThirdPerson;
+    private int prevThirdPersonView;
+    private Entity overlayBackupViewEntity;
 
     private double orbitDistance = 5.0;
     private float orbitYaw = 0.0f;
@@ -48,8 +54,7 @@ public class CameraDetach extends Module {
             return;
         }
 
-        prevThirdPerson = mc.gameSettings.thirdPersonView != 0;
-        if (prevThirdPerson) mc.gameSettings.thirdPersonView = 0;
+        prevThirdPersonView = mc.gameSettings.thirdPersonView;
 
         fakeEntity = new FakeCameraEntity();
         mc.world.addEntityToWorld(ENTITY_ID, fakeEntity);
@@ -64,12 +69,15 @@ public class CameraDetach extends Module {
     public void onDisable() {
         if (mc.player != null) {
             mc.setRenderViewEntity(mc.player);
-            if (prevThirdPerson) mc.gameSettings.thirdPersonView = 1;
+            if (mc.gameSettings.thirdPersonView != prevThirdPersonView) {
+                mc.gameSettings.thirdPersonView = prevThirdPersonView;
+            }
         }
         if (mc.world != null) {
             mc.world.removeEntityFromWorld(ENTITY_ID);
         }
         RaytraceUtil.updateMouseOver(mc.getRenderPartialTicks());
+        overlayBackupViewEntity = null;
         fakeEntity = null;
     }
 
@@ -79,6 +87,8 @@ public class CameraDetach extends Module {
             setEnabled(false);
             return;
         }
+
+        mc.gameSettings.thirdPersonView = 0;
 
         float pSpeed = panSpeed.getValue().floatValue();
         float smooth = smoothSpeed.getValue().floatValue();
@@ -176,14 +186,9 @@ public class CameraDetach extends Module {
                 int dy = org.lwjgl.input.Mouse.getDY();
 
                 if (dx != 0 || dy != 0) {
-                    float f = mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;
-                    float f1 = f * f * f * 8.0F;
-                    float f2 = (float)dx * f1;
-                    float f3 = (float)dy * f1;
-                    int i = mc.gameSettings.invertMouse ? -1 : 1;
+                    float[] delta = com.x4yi.x4tweaker.utils.camera.CameraUtil.calculateMouseDelta(dx, dy);
 
-
-                    mc.player.turn(f2, f3 * (float)i);
+                    mc.player.turn(delta[0], delta[1]);
                 }
             }
             RaytraceUtil.updateMouseOver(event.renderTickTime);
@@ -204,13 +209,46 @@ public class CameraDetach extends Module {
         }
     }
 
+    private boolean isRenderingPlayer = false;
+
     @SubscribeEvent
-    public void onRenderWorld(net.minecraftforge.client.event.RenderWorldLastEvent event) {
-        if (fakeEntity != null && mc.player != null) {
-            net.minecraft.entity.Entity backup = mc.getRenderManager().renderViewEntity;
-            mc.getRenderManager().renderViewEntity = mc.player;
-            mc.getRenderManager().renderEntityStatic(mc.player, event.getPartialTicks(), false);
-            mc.getRenderManager().renderViewEntity = backup;
+    public void onRenderPlayerPre(RenderPlayerEvent.Pre event) {
+        if (fakeEntity == null || mc.player == null) return;
+        if (!isDetachedActive()) return;
+        if (event.getEntityPlayer() == fakeEntity) {
+            event.setCanceled(true);
+            return;
+        }
+        if (event.getEntityPlayer() == mc.player && !isRenderingPlayer) {
+            event.setCanceled(true);
         }
     }
+
+    @SubscribeEvent
+    public void onOverlayPre(RenderGameOverlayEvent.Pre event) {
+        if (!isDetachedActive()) return;
+        if (overlayBackupViewEntity != null) return;
+        overlayBackupViewEntity = mc.getRenderViewEntity();
+        mc.setRenderViewEntity(mc.player);
+    }
+
+    @SubscribeEvent
+    public void onOverlayPost(RenderGameOverlayEvent.Post event) {
+        if (overlayBackupViewEntity == null) return;
+        mc.setRenderViewEntity(overlayBackupViewEntity);
+        overlayBackupViewEntity = null;
+    }
+
+    @SubscribeEvent
+    public void onRenderWorldLast(RenderWorldLastEvent event) {
+        if (!isDetachedActive()) return;
+        isRenderingPlayer = true;
+        DetachedCameraRenderUtil.renderLocalPlayerOpaque(mc, event.getPartialTicks());
+        isRenderingPlayer = false;
+    }
+
+    private boolean isDetachedActive() {
+        return mc != null && mc.player != null && fakeEntity != null && mc.getRenderViewEntity() == fakeEntity;
+    }
+
 }
