@@ -70,6 +70,7 @@ public class TargetSelector {
         for (int i = 0, size = entities.size(); i < size; i++) {
             Entity entity = entities.get(i);
             if (entity == player || !(entity instanceof EntityLivingBase)) continue;
+            if (entity instanceof com.x4yi.x4tweaker.utils.camera.FakeCameraEntity) continue;
 
             EntityLivingBase living = (EntityLivingBase) entity;
 

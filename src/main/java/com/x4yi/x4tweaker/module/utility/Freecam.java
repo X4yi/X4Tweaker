@@ -105,8 +105,13 @@ public class Freecam extends Module {
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && fakeEntity != null) {
+        if (event.phase == TickEvent.Phase.START && fakeEntity != null) {
+            RaytraceUtil.updateMouseOver(1.0F);
+        } else if (event.phase == TickEvent.Phase.END && fakeEntity != null) {
             com.x4yi.x4tweaker.utils.camera.CameraUtil.forceUpdateWalkingPlayer(mc);
+            if (mc.player != null && (mc.player.isDead || mc.player.getHealth() <= 0.0f)) {
+                this.setEnabled(false);
+            }
         }
     }
 
@@ -142,6 +147,22 @@ public class Freecam extends Module {
                 }
             }
             RaytraceUtil.updateMouseOver(event.renderTickTime);
+        } else if (event.phase == TickEvent.Phase.END && fakeEntity != null) {
+            RaytraceUtil.updateMouseOver(event.renderTickTime);
+        }
+    }
+
+    @SubscribeEvent
+    public void onMouseInput(net.minecraftforge.client.event.MouseEvent event) {
+        if (fakeEntity != null) {
+            RaytraceUtil.updateMouseOver(mc.getRenderPartialTicks());
+        }
+    }
+
+    @SubscribeEvent
+    public void onDrawBlockHighlight(net.minecraftforge.client.event.DrawBlockHighlightEvent event) {
+        if (isDetachedActive()) {
+            event.setCanceled(true);
         }
     }
 
@@ -177,11 +198,39 @@ public class Freecam extends Module {
 
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
-        if (!renderPlayer.getValue()) return;
         if (!isDetachedActive()) return;
-        isRenderingPlayer = true;
-        DetachedCameraRenderUtil.renderLocalPlayerOpaque(mc, event.getPartialTicks());
-        isRenderingPlayer = false;
+
+        RaytraceUtil.updateMouseOver(event.getPartialTicks());
+        
+        net.minecraft.util.math.RayTraceResult rtr = mc.objectMouseOver;
+        if (rtr != null && rtr.typeOfHit == net.minecraft.util.math.RayTraceResult.Type.BLOCK) {
+            net.minecraft.util.math.BlockPos pos = rtr.getBlockPos();
+            net.minecraft.block.state.IBlockState state = mc.world.getBlockState(pos);
+            if (state.getMaterial() != net.minecraft.block.material.Material.AIR && mc.world.getWorldBorder().contains(pos)) {
+                double rx = mc.getRenderManager().viewerPosX;
+                double ry = mc.getRenderManager().viewerPosY;
+                double rz = mc.getRenderManager().viewerPosZ;
+
+                net.minecraft.client.renderer.GlStateManager.enableBlend();
+                net.minecraft.client.renderer.GlStateManager.tryBlendFuncSeparate(net.minecraft.client.renderer.GlStateManager.SourceFactor.SRC_ALPHA, net.minecraft.client.renderer.GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, net.minecraft.client.renderer.GlStateManager.SourceFactor.ONE, net.minecraft.client.renderer.GlStateManager.DestFactor.ZERO);
+                net.minecraft.client.renderer.GlStateManager.glLineWidth(2.0F);
+                net.minecraft.client.renderer.GlStateManager.disableTexture2D();
+                net.minecraft.client.renderer.GlStateManager.depthMask(false);
+                
+                net.minecraft.util.math.AxisAlignedBB bb = state.getSelectedBoundingBox(mc.world, pos).grow(0.0020000000949949026D).offset(-rx, -ry, -rz);
+                net.minecraft.client.renderer.RenderGlobal.drawSelectionBoundingBox(bb, 0.0F, 0.0F, 0.0F, 0.4F);
+
+                net.minecraft.client.renderer.GlStateManager.depthMask(true);
+                net.minecraft.client.renderer.GlStateManager.enableTexture2D();
+                net.minecraft.client.renderer.GlStateManager.disableBlend();
+            }
+        }
+
+        if (renderPlayer.getValue()) {
+            isRenderingPlayer = true;
+            DetachedCameraRenderUtil.renderLocalPlayerOpaque(mc, event.getPartialTicks());
+            isRenderingPlayer = false;
+        }
     }
 
     @SubscribeEvent

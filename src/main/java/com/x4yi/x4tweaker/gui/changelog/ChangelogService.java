@@ -1,5 +1,7 @@
 package com.x4yi.x4tweaker.gui.changelog;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
@@ -13,6 +15,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ChangelogService {
     private static final String RELEASE_URL = "https://api.github.com/repos/X4yi/X4Tweaker/releases/tags/";
@@ -52,6 +56,53 @@ public final class ChangelogService {
         } finally {
             if (conn != null) conn.disconnect();
         }
+    }
+
+    public static List<String> fetchReleases() {
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL("https://api.github.com/repos/X4yi/X4Tweaker/releases");
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(3000);
+            conn.setReadTimeout(4000);
+            conn.setRequestProperty("Accept", "application/vnd.github+json");
+            conn.setRequestProperty("User-Agent", "X4Tweaker-Client");
+
+            int code = conn.getResponseCode();
+            InputStream input = code >= 200 && code < 300 ? conn.getInputStream() : conn.getErrorStream();
+            if (input == null) throw new RuntimeException("No response from GitHub");
+
+            String body = readAll(input);
+            if (code >= 200 && code < 300) {
+                saveCache("releases_index", body);
+            } else {
+                throw new RuntimeException("HTTP " + code);
+            }
+            return parseReleases(body);
+        } catch (Exception e) {
+            String cached = loadCache("releases_index");
+            if (cached != null) {
+                return parseReleases(cached);
+            }
+            return new ArrayList<String>();
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    private static List<String> parseReleases(String jsonBody) {
+        List<String> tags = new ArrayList<String>();
+        try {
+            JsonArray arr = new JsonParser().parse(jsonBody).getAsJsonArray();
+            for (JsonElement el : arr) {
+                JsonObject obj = el.getAsJsonObject();
+                if (obj.has("tag_name") && !obj.get("tag_name").isJsonNull()) {
+                    tags.add(obj.get("tag_name").getAsString());
+                }
+            }
+        } catch (Exception ignored) {}
+        return tags;
     }
 
     private static String readAll(InputStream input) throws Exception {

@@ -145,7 +145,7 @@ public abstract class ESPBase extends Module {
         return entity != null && entity != mc.player && !(entity instanceof FakeCameraEntity);
     }
 
-    private void updateTracerStart(float partialTicks) {
+    protected void updateTracerStart(float partialTicks) {
         Entity camera = mc.getRenderViewEntity();
         if (camera == null) camera = mc.player;
         if (camera == null) {
@@ -155,26 +155,29 @@ public abstract class ESPBase extends Module {
             return;
         }
 
-        double camX = camera.lastTickPosX + (camera.posX - camera.lastTickPosX) * partialTicks;
-        double camY = camera.lastTickPosY + (camera.posY - camera.lastTickPosY) * partialTicks + camera.getEyeHeight();
-        double camZ = camera.lastTickPosZ + (camera.posZ - camera.lastTickPosZ) * partialTicks;
+        java.nio.FloatBuffer modelView = org.lwjgl.BufferUtils.createFloatBuffer(16);
+        org.lwjgl.opengl.GL11.glGetFloat(org.lwjgl.opengl.GL11.GL_MODELVIEW_MATRIX, modelView);
 
-        float yaw = camera.prevRotationYaw + (camera.rotationYaw - camera.prevRotationYaw) * partialTicks;
-        float pitch = camera.prevRotationPitch + (camera.rotationPitch - camera.prevRotationPitch) * partialTicks;
+        // Extract matrices: Column-major format
+        float m00 = modelView.get(0), m01 = modelView.get(1), m02 = modelView.get(2);
+        float m10 = modelView.get(4), m11 = modelView.get(5), m12 = modelView.get(6);
+        float m20 = modelView.get(8), m21 = modelView.get(9), m22 = modelView.get(10);
+        float m30 = modelView.get(12), m31 = modelView.get(13), m32 = modelView.get(14);
 
-        float yawRad = yaw * 0.017453292F;
-        float pitchRad = pitch * 0.017453292F;
-        double dirX = -MathHelper.sin(yawRad) * MathHelper.cos(pitchRad);
-        double dirY = -MathHelper.sin(pitchRad);
-        double dirZ = MathHelper.cos(yawRad) * MathHelper.cos(pitchRad);
+        // Calculate inverse translation (true camera origin in relative world space)
+        float invTx = -(m00 * m30 + m01 * m31 + m02 * m32);
+        float invTy = -(m10 * m30 + m11 * m31 + m12 * m32);
+        float invTz = -(m20 * m30 + m21 * m31 + m22 * m32);
 
-        double startWorldX = camX + dirX * 2.0D;
-        double startWorldY = camY + dirY * 2.0D;
-        double startWorldZ = camZ + dirZ * 2.0D;
+        // Forward vector is the 3rd row of the rotation matrix (negated)
+        float fwdX = -m02;
+        float fwdY = -m12;
+        float fwdZ = -m22;
 
-        tracerStartX = startWorldX - mc.getRenderManager().viewerPosX;
-        tracerStartY = startWorldY - mc.getRenderManager().viewerPosY;
-        tracerStartZ = startWorldZ - mc.getRenderManager().viewerPosZ;
+        // Start line slightly in front of the camera to align with crosshair
+        tracerStartX = invTx + fwdX;
+        tracerStartY = invTy + fwdY;
+        tracerStartZ = invTz + fwdZ;
     }
 
     protected void drawTracerLine(double startX, double startY, double startZ,

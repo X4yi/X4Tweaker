@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = 'r1.0.1'
+version = 'r1.0.2'
 group = 'com.x4yi.x4tweaker'
 archivesBaseName = 'x4tweaker'
 
@@ -25,9 +25,9 @@ minecraft {
 
     runs {
         client {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
+        jvmArgs '-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true'
+        jvmArgs '-Djava.awt.headless=false'
+        environment 'DISPLAY', System.getenv('DISPLAY') ?: ':0'
         }
 
         server {
@@ -47,6 +47,15 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2864'
 
 
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.ow2.asm:asm:6.0'
+        force 'org.ow2.asm:asm-tree:6.0'
+        force 'org.ow2.asm:asm-util:6.0'
+        force 'org.ow2.asm:asm-analysis:6.0'
+    }
 }
 
 

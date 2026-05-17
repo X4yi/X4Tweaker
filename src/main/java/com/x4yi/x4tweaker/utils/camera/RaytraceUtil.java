@@ -57,6 +57,7 @@ public class RaytraceUtil {
 
         for (int j = 0; j < list.size(); ++j) {
             Entity entity1 = list.get(j);
+            if (entity1 instanceof com.x4yi.x4tweaker.utils.camera.FakeCameraEntity) continue;
             AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().grow((double)entity1.getCollisionBorderSize());
             RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
 

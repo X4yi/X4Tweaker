@@ -8,6 +8,12 @@ public class Fullbright extends Module {
 
     public Fullbright() {
         super("Fullbright", "Increases brightness", Category.VISUALS);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (this.isEnabled() && mc != null && mc.gameSettings != null) {
+                mc.gameSettings.gammaSetting = oldGamma;
+                mc.gameSettings.saveOptions();
+            }
+        }));
     }
 
     @Override

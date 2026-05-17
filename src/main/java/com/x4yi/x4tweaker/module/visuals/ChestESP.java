@@ -42,6 +42,10 @@ public class ChestESP extends ESPBase {
         boolean drawLines = currentStyle.equals("Lines") || currentStyle.equals("Lines&Boxes");
         boolean drawBoxes = currentStyle.equals("Boxes") || currentStyle.equals("Lines&Boxes");
 
+        if (drawLines) {
+            updateTracerStart(mc.getRenderPartialTicks());
+        }
+
         // Check if there's anything to render at all
         List<Entity> entities = getEntities();
         List<TileEntity> tileEntities = mc.world.loadedTileEntityList;
