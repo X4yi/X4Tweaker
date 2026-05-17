@@ -14,6 +14,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class RaytraceUtil {
+    private static final int FREECAM_ENTITY_ID = -42069;
+    private static final int CAMERA_DETACH_ENTITY_ID = -42070;
     private static final Predicate<Entity> COLLIDABLE_PREDICATE = new Predicate<Entity>() {
         public boolean apply(@Nullable Entity p_apply_1_) {
             return p_apply_1_ != null && p_apply_1_.canBeCollidedWith();
@@ -21,6 +23,9 @@ public class RaytraceUtil {
     };
     private static final Predicate<Entity> TARGET_PREDICATE = Predicates.and(EntitySelectors.NOT_SPECTATING, COLLIDABLE_PREDICATE);
 
+    private static boolean isLocalCameraEntity(@Nullable Entity entity) {
+        return entity instanceof FakeCameraEntity || (entity != null && (entity.getEntityId() == FREECAM_ENTITY_ID || entity.getEntityId() == CAMERA_DETACH_ENTITY_ID));
+    }
 
 
     public static void updateMouseOver(float partialTicks) {
@@ -42,6 +47,10 @@ public class RaytraceUtil {
             if (d0 > 3.0D) flag = true;
         }
 
+        if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY && isLocalCameraEntity(mc.objectMouseOver.entityHit)) {
+            mc.objectMouseOver = null;
+        }
+
         if (mc.objectMouseOver != null) {
             d1 = mc.objectMouseOver.hitVec.distanceTo(vec3d);
         }
@@ -57,7 +66,7 @@ public class RaytraceUtil {
 
         for (int j = 0; j < list.size(); ++j) {
             Entity entity1 = list.get(j);
-            if (entity1 instanceof com.x4yi.x4tweaker.utils.camera.FakeCameraEntity) continue;
+            if (isLocalCameraEntity(entity1)) continue;
             AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().grow((double)entity1.getCollisionBorderSize());
             RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
 
@@ -91,6 +100,13 @@ public class RaytraceUtil {
 
         if (mc.pointedEntity != null && vec3d3 != null && (d2 < d1 || mc.objectMouseOver == null)) {
             mc.objectMouseOver = new RayTraceResult(mc.pointedEntity, vec3d3);
+        }
+
+        if (isLocalCameraEntity(mc.pointedEntity)) {
+            mc.pointedEntity = null;
+        }
+        if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY && isLocalCameraEntity(mc.objectMouseOver.entityHit)) {
+            mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, vec3d2, (EnumFacing)null, new BlockPos(vec3d2));
         }
     }
 }

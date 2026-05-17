@@ -197,13 +197,7 @@ public class EnvironmentScanner {
         return maxDist;
     }
 
-    /**
-     * Checks if a block is considered solid for navigation purposes.
-     * TODO: This currently uses isFullBlock(), which fails to detect
-     * partial solid blocks like fence gates, slabs, and stairs.
-     * Future refactors should use getCollisionBoundingBox() for accurate
-     * collision detection.
-     */
+
     private boolean isSolid(BlockPos pos) {
         if (mc.world == null) return false;
         IBlockState state = mc.world.getBlockState(pos);

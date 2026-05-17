@@ -32,7 +32,7 @@ public class FastCrafting extends Module {
     public void onUpdate() {
         if (mc.player == null || !(mc.currentScreen instanceof GuiCrafting) || !(mc.player.openContainer instanceof ContainerWorkbench)) {
             triggerPressed = false;
-            // Invalidate stale recipe when leaving crafting GUI
+
             if (hasRecipe()) {
                 clearRecipe();
             }

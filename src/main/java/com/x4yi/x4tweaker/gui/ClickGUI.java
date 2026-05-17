@@ -26,17 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Main GUI class for X4Tweaker.
- *
- * TODO (Technical Debt): This class is currently a monolith (~1300 LOC).
- * Future refactors should extract tab rendering and handling into separate classes:
- * - ThemeTabRenderer (for drawThemeTab/handleThemeTabClick)
- * - KeybindsTabRenderer (for drawKeybindsTab/handleKeybindsTabClick)
- * - BotTabRenderer, etc.
- *
- * This will improve maintainability and separate rendering from state management.
- */
+
 public class ClickGUI extends GuiScreen {
     private int ancho, alto, x, y;
     private static final int MIN_W = 340, MAX_W = 520, MIN_H = 220, MAX_H = 380;

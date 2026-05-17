@@ -25,7 +25,7 @@ public class ChangelogScreen extends GuiScreen {
     private String currentTag = X4Tweaker.VERSION;
     private String currentLang = "ES";
     private String rawChangelog = "";
-    
+
     private boolean dropdownOpen = false;
     private final List<String> availableTags = new ArrayList<String>();
     private int dropdownScroll = 0;
@@ -146,7 +146,7 @@ public class ChangelogScreen extends GuiScreen {
             int dropH = Math.min(100, availableTags.size() * 12);
             RenderUtils.drawRect(dropX, dropY, dropX + dropW, dropY + dropH, 0xFF222222);
             RenderUtils.drawBorderedRect(dropX, dropY, dropX + dropW, dropY + dropH, 1.0f, 0xFF555555, 0x00000000);
-            
+
             int startIdx = dropdownScroll;
             for (int i = 0; i < dropH / 12 && i + startIdx < availableTags.size(); i++) {
                 int itemY = dropY + i * 12;
@@ -175,7 +175,7 @@ public class ChangelogScreen extends GuiScreen {
             Line line = snapshot.get(i);
             List<String> wrapped = mc.fontRenderer.listFormattedStringToWidth(line.text, w - line.indent - 4);
             int wrappedHeight = wrapped.size() * line.height;
-            
+
             if (drawY + wrappedHeight >= y && drawY <= y + h + wrappedHeight) {
                 int tempY = drawY;
                 for (String s : wrapped) {
@@ -251,14 +251,14 @@ public class ChangelogScreen extends GuiScreen {
         super.handleMouseInput();
         int wheel = Mouse.getEventDWheel();
         if (wheel == 0) return;
-        
+
         if (dropdownOpen) {
             int maxDropScroll = Math.max(0, availableTags.size() - 100 / 12);
             if (wheel < 0) dropdownScroll = Math.min(maxDropScroll, dropdownScroll + 1);
             else dropdownScroll = Math.max(0, dropdownScroll - 1);
             return;
         }
-        
+
         if (wheel < 0) scrollOffset = Math.min(maxScroll, scrollOffset + 14);
         else scrollOffset = Math.max(0, scrollOffset - 14);
     }
@@ -275,18 +275,18 @@ public class ChangelogScreen extends GuiScreen {
         boolean inCodeBlock = false;
         String[] rows = markdown.replace("\r", "").split("\n");
         String currentBlockLang = "ANY";
-        
+
         for (int i = 0; i < rows.length; i++) {
             String raw = rows[i];
             String trimmed = raw.trim();
             if (trimmed.equalsIgnoreCase("[EN]")) { currentBlockLang = "EN"; continue; }
             if (trimmed.equalsIgnoreCase("[ES]")) { currentBlockLang = "ES"; continue; }
             if (trimmed.equalsIgnoreCase("[/EN]") || trimmed.equalsIgnoreCase("[/ES]")) { currentBlockLang = "ANY"; continue; }
-            
+
             if (!currentBlockLang.equals("ANY") && !currentBlockLang.equalsIgnoreCase(currentLang)) {
                 continue;
             }
-            
+
             if (raw.startsWith("```")) {
                 inCodeBlock = !inCodeBlock;
                 continue;
@@ -324,11 +324,11 @@ public class ChangelogScreen extends GuiScreen {
     private String sanitizeInline(String line) {
         if (line == null || line.isEmpty()) return "";
         String out = line;
-        // Convert markdown bold to Minecraft bold, but \u00A7r resets to white.
-        // We will just remove ** since line color is fixed, or we can use \u00A7l if we assume default color.
-        out = out.replace("**", "\u00A7l").replace("__", "\u00A7l"); // Minecraft bold
-        out = out.replace("`", "\u00A77"); // Grey for inline code
-        out = out.replaceAll("\\[(.*?)\\]\\((.*?)\\)", "\u00A7b$1\u00A7r"); // Cyan for links
+
+
+        out = out.replace("**", "\u00A7l").replace("__", "\u00A7l");
+        out = out.replace("`", "\u00A77");
+        out = out.replaceAll("\\[(.*?)\\]\\((.*?)\\)", "\u00A7b$1\u00A7r");
         return out;
     }
 

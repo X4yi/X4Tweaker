@@ -261,7 +261,7 @@ public class CameraDetach extends Module {
         if (!isDetachedActive()) return;
 
         RaytraceUtil.updateMouseOver(event.getPartialTicks());
-        
+
         net.minecraft.util.math.RayTraceResult rtr = mc.objectMouseOver;
         if (rtr != null && rtr.typeOfHit == net.minecraft.util.math.RayTraceResult.Type.BLOCK) {
             net.minecraft.util.math.BlockPos pos = rtr.getBlockPos();
@@ -276,7 +276,7 @@ public class CameraDetach extends Module {
                 net.minecraft.client.renderer.GlStateManager.glLineWidth(2.0F);
                 net.minecraft.client.renderer.GlStateManager.disableTexture2D();
                 net.minecraft.client.renderer.GlStateManager.depthMask(false);
-                
+
                 net.minecraft.util.math.AxisAlignedBB bb = state.getSelectedBoundingBox(mc.world, pos).grow(0.0020000000949949026D).offset(-rx, -ry, -rz);
                 net.minecraft.client.renderer.RenderGlobal.drawSelectionBoundingBox(bb, 0.0F, 0.0F, 0.0F, 0.4F);
 

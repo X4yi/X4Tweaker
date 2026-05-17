@@ -20,7 +20,7 @@ build
 # other
 eclipse
 run
-reglas.md
+r.md
 remove_comments.py
 changelog.txt
 gradle
