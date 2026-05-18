@@ -115,23 +115,19 @@ public class HSVColorPicker implements GuiComponent {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         net.minecraft.client.renderer.Tessellator tessellator = net.minecraft.client.renderer.Tessellator.getInstance();
         net.minecraft.client.renderer.BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(7, net.minecraft.client.renderer.vertex.DefaultVertexFormats.POSITION_COLOR);
-        for (int i = 0; i < 360; i += 3) {
-            double startAngle = Math.toRadians(i - 90);
-            double endAngle = Math.toRadians(i + 3 - 90);
-            float startHue = i / 360.0f;
-            float endHue = (i + 3) / 360.0f;
-            int startColor = java.awt.Color.HSBtoRGB(startHue, 1.0f, 1.0f);
-            int endColor = java.awt.Color.HSBtoRGB(endHue, 1.0f, 1.0f);
-            float sr = (float)((startColor >> 16) & 0xFF) / 255.0f;
-            float sg = (float)((startColor >> 8) & 0xFF) / 255.0f;
-            float sb = (float)(startColor & 0xFF) / 255.0f;
-            float er = (float)((endColor >> 16) & 0xFF) / 255.0f;
-            float eg = (float)((endColor >> 8) & 0xFF) / 255.0f;
-            float eb = (float)(endColor & 0xFF) / 255.0f;
-            buffer.pos(cx, cy, 0.0).color(sr, sg, sb, 1.0f).endVertex();
-            buffer.pos(cx + Math.cos(startAngle) * radius, cy + Math.sin(startAngle) * radius, 0.0).color(sr, sg, sb, 1.0f).endVertex();
-            buffer.pos(cx + Math.cos(endAngle) * radius, cy + Math.sin(endAngle) * radius, 0.0).color(er, eg, eb, 1.0f).endVertex();
+        buffer.begin(6, net.minecraft.client.renderer.vertex.DefaultVertexFormats.POSITION_COLOR);
+        int segments = 72;
+        for (int i = 0; i <= segments; i++) {
+            double angle = Math.toRadians((i * 360.0 / segments) - 90);
+            float hueVal = i / (float) segments;
+            int color = java.awt.Color.HSBtoRGB(hueVal, 1.0f, 1.0f);
+            float r = (float)((color >> 16) & 0xFF) / 255.0f;
+            float g = (float)((color >> 8) & 0xFF) / 255.0f;
+            float b = (float)(color & 0xFF) / 255.0f;
+            if (i == 0) {
+                buffer.pos(cx, cy, 0.0).color(r, g, b, 1.0f).endVertex();
+            }
+            buffer.pos(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius, 0.0).color(r, g, b, 1.0f).endVertex();
         }
         tessellator.draw();
         GL11.glEnable(GL11.GL_TEXTURE_2D);

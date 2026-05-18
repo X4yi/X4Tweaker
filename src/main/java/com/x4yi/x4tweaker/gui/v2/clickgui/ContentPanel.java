@@ -4,14 +4,11 @@ import com.x4yi.x4tweaker.core.X4TweakerClient;
 import com.x4yi.x4tweaker.gui.v2.framework.ScrollablePanel;
 import com.x4yi.x4tweaker.gui.v2.framework.ThemeBridge;
 import com.x4yi.x4tweaker.gui.v2.utils.DrawHelper;
-import com.x4yi.x4tweaker.gui.v2.utils.GLHelper;
 import com.x4yi.x4tweaker.gui.v2.utils.MathHelper;
 import com.x4yi.x4tweaker.module.Category;
 import com.x4yi.x4tweaker.module.Module;
 import com.x4yi.x4tweaker.setting.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,29 +88,16 @@ public class ContentPanel extends ScrollablePanel {
 
                 DrawHelper.drawBorderedRect(contentX + 4, panelTop, contentX + contentW, panelBottom, 1.0f, theme.getSeparatorColor(), theme.getSettingsPanelColor());
 
-                int clipH = Math.max(0, animH);
-                if (clipH > 0) {
-                    ScaledResolution sr = new ScaledResolution(mc);
-                    int scale = sr.getScaleFactor();
-                    int glY = mc.displayHeight - (panelTop + clipH) * scale;
-                    GL11.glEnable(GL11.GL_SCISSOR_TEST);
-                    GL11.glScissor((contentX + 4) * scale, glY, (contentW - 4) * scale, clipH * scale);
-                }
-
                 int setY = curY + 2;
                 for (Setting<?> s : row.getModule().getSettings()) {
                     if (!s.isVisible()) continue;
                     int rowH = getSettingHeight(s);
                     int settingBottom = setY + rowH;
-                    if (settingBottom > panelTop && setY < panelTop + clipH) {
+                    if (settingBottom > panelTop && setY < panelBottom) {
                         renderSettingInline(s, contentX, setY, contentW, mouseX, mouseY);
                     }
                     setY += rowH + 2;
                     totalH += rowH + 2;
-                }
-
-                if (clipH > 0) {
-                    GL11.glDisable(GL11.GL_SCISSOR_TEST);
                 }
 
                 curY += animH + 4;
@@ -196,6 +180,7 @@ public class ContentPanel extends ScrollablePanel {
     }
 
     private void renderSettingInline(Setting<?> s, int sx, int sy, int sw, int mx, int my) {
+        int textMaxW = sw - 8;
         if (s instanceof NumberSetting) {
             NumberSetting ns = (NumberSetting) s;
             double val = ns.getValue();
@@ -211,10 +196,10 @@ public class ContentPanel extends ScrollablePanel {
             DrawHelper.drawCircle(nubX, trackY + trackH / 2, 4, 0xFFFFFFFF);
             DrawHelper.drawCircle(nubX, trackY + trackH / 2, 3, theme.getAccentColor());
             String displayVal = ns.getIncrement() == 1.0 ? String.valueOf((int) val) : String.format("%.2f", val);
-            mc.fontRenderer.drawStringWithShadow(s.getName() + ": " + displayVal, sx + 4, sy + 2, 0xFFDDDDDD);
+            drawWrappedString(s.getName() + ": " + displayVal, sx + 4, sy + 2, textMaxW, 0xFFDDDDDD);
         } else if (s instanceof BooleanSetting) {
             boolean on = ((BooleanSetting) s).getValue();
-            mc.fontRenderer.drawStringWithShadow(s.getName(), sx + 4, sy + 4, 0xFFDDDDDD);
+            drawWrappedString(s.getName(), sx + 4, sy + 4, textMaxW - 30, 0xFFDDDDDD);
             int swX = sx + sw - 26;
             int swBg = on ? theme.getEnabledColor() : theme.getToggleSwitchBgColor();
             DrawHelper.drawBorderedRect(swX, sy + 3, swX + 22, sy + 13, 1.0f, theme.getSeparatorColor(), swBg);
@@ -224,29 +209,56 @@ public class ContentPanel extends ScrollablePanel {
             String modeVal = String.valueOf(s.getValue());
             int modeW = mc.fontRenderer.getStringWidth(modeVal);
             int centerX = sx + sw / 2;
-            mc.fontRenderer.drawStringWithShadow(s.getName() + ":", sx + 4, sy + 4, 0xFFDDDDDD);
+            drawWrappedString(s.getName() + ":", sx + 4, sy + 4, textMaxW / 2 - 10, 0xFFDDDDDD);
             mc.fontRenderer.drawStringWithShadow("\u25C0", centerX - modeW / 2 - 14, sy + 4, 0xFF888888);
             mc.fontRenderer.drawStringWithShadow(modeVal, centerX - modeW / 2, sy + 4, 0xFFBBBBFF);
             mc.fontRenderer.drawStringWithShadow("\u25B6", centerX + modeW / 2 + 4, sy + 4, 0xFF888888);
         } else if (s instanceof StringListSetting) {
             StringListSetting sl = (StringListSetting) s;
-            mc.fontRenderer.drawStringWithShadow(s.getName() + ":", sx + 4, sy + 3, 0xFFDDDDDD);
+            drawWrappedString(s.getName() + ":", sx + 4, sy + 3, textMaxW, 0xFFDDDDDD);
             int inputY = sy + 14;
             DrawHelper.drawBorderedRect(sx + 4, inputY, sx + sw - 4, inputY + 12, 1.0f, theme.getSeparatorColor(), theme.getInputFieldColor());
             mc.fontRenderer.drawStringWithShadow("Click to add...", sx + 8, inputY + 2, 0xFFAAAAAA);
             int itemY = inputY + 14;
             for (String item : sl.getValue()) {
-                mc.fontRenderer.drawStringWithShadow("- " + item, sx + 8, itemY + 2, 0xFFCCCCCC);
+                drawWrappedString("- " + item, sx + 8, itemY + 2, textMaxW - 24, 0xFFCCCCCC);
                 mc.fontRenderer.drawStringWithShadow("[x]", sx + sw - 20, itemY + 2, 0xFFFF5555);
                 itemY += 14;
             }
         } else if (s instanceof ColorSetting) {
             int color = ((ColorSetting) s).getValue().getRGB();
-            mc.fontRenderer.drawStringWithShadow(s.getName(), sx + 4, sy + 4, 0xFFDDDDDD);
+            drawWrappedString(s.getName(), sx + 4, sy + 4, textMaxW - 16, 0xFFDDDDDD);
             int previewX = sx + sw - 16;
             DrawHelper.drawBorderedRect(previewX, sy + 3, previewX + 12, sy + 13, 1.0f, theme.getSeparatorColor(), color);
         } else {
-            mc.fontRenderer.drawStringWithShadow(s.getName() + ": " + s.getValue(), sx + 4, sy + 3, 0xFFDDDDDD);
+            drawWrappedString(s.getName() + ": " + s.getValue(), sx + 4, sy + 3, textMaxW, 0xFFDDDDDD);
+        }
+    }
+
+    private void drawWrappedString(String text, int x, int y, int maxWidth, int color) {
+        if (maxWidth <= 0) return;
+        net.minecraft.client.gui.FontRenderer fr = mc.fontRenderer;
+        if (fr.getStringWidth(text) <= maxWidth) {
+            fr.drawStringWithShadow(text, x, y, color);
+            return;
+        }
+        String[] words = text.split(" ");
+        StringBuilder line = new StringBuilder();
+        int curY = y;
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
+            String test = line.length() > 0 ? line + " " + word : word;
+            if (fr.getStringWidth(test) > maxWidth && line.length() > 0) {
+                fr.drawStringWithShadow(line.toString(), x, curY, color);
+                line = new StringBuilder(word);
+                curY += fr.FONT_HEIGHT + 2;
+            } else {
+                if (line.length() > 0) line.append(" ");
+                line.append(word);
+            }
+        }
+        if (line.length() > 0) {
+            fr.drawStringWithShadow(line.toString(), x, curY, color);
         }
     }
 

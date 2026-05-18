@@ -3,6 +3,7 @@ package com.x4yi.x4tweaker.gui.v2.theme;
 import com.x4yi.x4tweaker.gui.v2.clickgui.ClickGUI;
 import com.x4yi.x4tweaker.gui.v2.framework.ThemeBridge;
 import com.x4yi.x4tweaker.gui.v2.utils.DrawHelper;
+import com.x4yi.x4tweaker.gui.v2.utils.GLHelper;
 import com.x4yi.x4tweaker.gui.v2.utils.GuiScaler;
 import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.input.Keyboard;
@@ -99,9 +100,7 @@ public class ThemeEditorGUI extends GuiScreen {
         guiPreviewRenderer = new GuiPreviewRenderer(theme);
 
         previewAreaX = windowX + paletteW + pickerW + 12;
-        previewAreaY = windowY + windowH - 160;
         previewAreaW = rightPanelW - 6;
-        previewAreaH = 150;
     }
 
     private int hsvPickerWidth() {
@@ -113,6 +112,8 @@ public class ThemeEditorGUI extends GuiScreen {
         DrawHelper.drawBorderedRect(windowX - 1, windowY - 1, windowX + windowW + 1, windowY + windowH + 1, 1.5f, theme.getBorderColor(), theme.getBgColor());
         DrawHelper.drawRect(windowX, windowY, windowX + windowW, windowY + windowH, theme.getBgColor());
         DrawHelper.drawGradientRectH(windowX, windowY, windowX + windowW, windowY + headerHeight, theme.getAccentDarkColor(), theme.getAccentColor());
+
+        GLHelper.enableScissor(windowX, windowY, windowW, windowH);
 
         mc.fontRenderer.drawStringWithShadow("Theme Editor", windowX + 10, windowY + 10, 0xFFFFFFFF);
 
@@ -159,14 +160,19 @@ public class ThemeEditorGUI extends GuiScreen {
 
         previewControls.render(mouseX, mouseY, partialTicks);
 
+        int controlsBottom = previewControls.getY() + previewControls.getHeight();
+        int gap = 12;
+        previewAreaY = controlsBottom + gap;
+        previewAreaH = windowY + windowH - previewAreaY - 10;
+
         DrawHelper.drawBorderedRect(previewAreaX, previewAreaY, previewAreaX + previewAreaW, previewAreaY + previewAreaH, 1.0f, theme.getSeparatorColor(), theme.getContentBgColor());
         mc.fontRenderer.drawStringWithShadow("Live Preview", previewAreaX + 4, previewAreaY - 10, 0xFFAAAAAA);
 
         if (previewControls.showClickGUIPreview || previewControls.showChangelogPreview) {
             int count = (previewControls.showClickGUIPreview ? 1 : 0) + (previewControls.showChangelogPreview ? 1 : 0);
-            int gap = 8;
+            int thumbGap = 8;
             int pad = 6;
-            int availW = previewAreaW - pad * 2 - gap * (count - 1);
+            int availW = previewAreaW - pad * 2 - thumbGap * (count - 1);
             int singleW = availW / count;
             int singleH = previewAreaH - pad * 2;
             int curX = previewAreaX + pad;
@@ -174,12 +180,14 @@ public class ThemeEditorGUI extends GuiScreen {
 
             if (previewControls.showClickGUIPreview) {
                 guiPreviewRenderer.renderClickGUIThumbnail(curX, curY, singleW, singleH);
-                curX += singleW + gap;
+                curX += singleW + thumbGap;
             }
             if (previewControls.showChangelogPreview) {
                 guiPreviewRenderer.renderChangelogThumbnail(curX, curY, singleW, singleH);
             }
         }
+
+        GLHelper.disableScissor();
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }

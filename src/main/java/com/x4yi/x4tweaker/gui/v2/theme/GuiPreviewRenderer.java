@@ -21,7 +21,7 @@ public class GuiPreviewRenderer {
     public void renderClickGUIThumbnail(int x, int y, int w, int h) {
         DrawHelper.drawBorderedRect(x, y, x + w, y + h, 1.0f, theme.getBorderColor(), theme.getBgColor());
         DrawHelper.drawRect(x, y, x + w, y + HEADER_H, theme.getAccentColor());
-        mc.fontRenderer.drawStringWithShadow("X4Tweaker", x + PAD, y + 4, 0xFFFFFFFF);
+        if (w > 40) mc.fontRenderer.drawStringWithShadow("X4Tweaker", x + PAD, y + 4, 0xFFFFFFFF);
 
         int sidebarW = w * SIDEBAR_W_RATIO / 100;
         DrawHelper.drawRect(x, y + HEADER_H, x + sidebarW, y + h, theme.getSidebarBgColor());
@@ -35,23 +35,27 @@ public class GuiPreviewRenderer {
                 DrawHelper.drawRect(x, catY, x + 2, catY + 8, theme.getAccentColor());
                 DrawHelper.drawRect(x + 2, catY, x + sidebarW, catY + 8, theme.getSurfaceHoverColor());
             }
-            mc.fontRenderer.drawStringWithShadow(cats[i], x + 4, catY + 1, sel ? 0xFFFFFFFF : 0xFF777777);
+            if (sidebarW > 30) mc.fontRenderer.drawStringWithShadow(cats[i], x + 4, catY + 1, sel ? 0xFFFFFFFF : 0xFF777777);
             catY += 10;
         }
 
         int rowX = x + sidebarW + PAD;
         int rowW = w - sidebarW - PAD * 2;
         int rowY = y + HEADER_H + PAD;
-        for (int i = 0; i < 5 && rowY + ROW_H < y + h; i++) {
+        String[] names = {"Fullbright", "PlayerESP", "AutoSprint", "KillAura", "Freecam"};
+        for (int i = 0; i < names.length && rowY + ROW_H < y + h; i++) {
             boolean hover = i == 1;
             int bg = hover ? theme.getSurfaceHoverColor() : theme.getSurfaceColor();
             DrawHelper.drawRect(rowX, rowY, rowX + rowW, rowY + ROW_H, bg);
-            String name = i == 0 ? "Fullbright" : (i == 1 ? "PlayerESP" : (i == 2 ? "AutoSprint" : (i == 3 ? "KillAura" : "Freecam")));
-            mc.fontRenderer.drawStringWithShadow(name, rowX + 2, rowY + 1, 0xFFDDDDDD);
+            if (rowW > 30) {
+                mc.fontRenderer.drawStringWithShadow(names[i], rowX + 2, rowY + 1, 0xFFDDDDDD);
+            }
             if (i % 2 == 0) {
                 int tw = 14;
-                DrawHelper.drawBorderedRect(rowX + rowW - tw - 2, rowY + 1, rowX + rowW - 2, rowY + ROW_H - 1, 0.5f, theme.getEnabledDarkColor(), theme.getEnabledColor());
-                mc.fontRenderer.drawStringWithShadow("ON", rowX + rowW - tw, rowY + 2, 0xFFFFFFFF);
+                if (rowW > tw + 10) {
+                    DrawHelper.drawBorderedRect(rowX + rowW - tw - 2, rowY + 1, rowX + rowW - 2, rowY + ROW_H - 1, 0.5f, theme.getEnabledDarkColor(), theme.getEnabledColor());
+                    mc.fontRenderer.drawStringWithShadow("ON", rowX + rowW - tw, rowY + 2, 0xFFFFFFFF);
+                }
             }
             rowY += ROW_H + 2;
         }
@@ -62,24 +66,28 @@ public class GuiPreviewRenderer {
         DrawHelper.drawRect(x, y, x + w, y + h, 0xE0151515);
         DrawHelper.drawGradientRectH(x, y, x + w, y + HEADER_H, 0xFF2A2A2A, 0xFF383838);
 
-        mc.fontRenderer.drawStringWithShadow("Changelog", x + PAD, y + 4, 0xFFFFFFFF);
+        if (w > 50) mc.fontRenderer.drawStringWithShadow("Changelog", x + PAD, y + 4, 0xFFFFFFFF);
 
         int btnX = x + PAD + 40;
-        DrawHelper.drawRect(btnX, y + 3, btnX + 30, y + 11, 0xFF333333);
-        mc.fontRenderer.drawStringWithShadow("r1.0.3", btnX + 2, y + 4, 0xFFFFFFFF);
+        if (w > 80) {
+            DrawHelper.drawRect(btnX, y + 3, btnX + 30, y + 11, 0xFF333333);
+            mc.fontRenderer.drawStringWithShadow("r1.0.3b1", btnX + 2, y + 4, 0xFFFFFFFF);
 
-        DrawHelper.drawRect(btnX + 34, y + 3, btnX + 50, y + 11, 0xFF333333);
-        mc.fontRenderer.drawStringWithShadow("ES", btnX + 38, y + 4, 0xFFFFFFFF);
+            DrawHelper.drawRect(btnX + 34, y + 3, btnX + 50, y + 11, 0xFF333333);
+            mc.fontRenderer.drawStringWithShadow("ES", btnX + 38, y + 4, 0xFFFFFFFF);
+        }
 
         int contentY = y + HEADER_H + PAD;
-        mc.fontRenderer.drawStringWithShadow("Changelog r1.0.3", x + PAD, contentY, 0xFF66FF66);
-        contentY += 10;
-        mc.fontRenderer.drawStringWithShadow("  - GUIs refactor completo", x + PAD, contentY, 0xFFE0E0E0);
-        contentY += 10;
-        mc.fontRenderer.drawStringWithShadow("  - Nuevo Theme Editor", x + PAD, contentY, 0xFFE0E0E0);
-        contentY += 10;
-        mc.fontRenderer.drawStringWithShadow("  - Click derecho para config", x + PAD, contentY, 0xFFE0E0E0);
-        contentY += 10;
-        mc.fontRenderer.drawStringWithShadow("  - Fix toggle visual bugs", x + PAD, contentY, 0xFFE0E0E0);
+        String[] lines = {
+            "Changelog r1.0.3b1",
+            "  - GUIs refactor completo",
+            "  - Nuevo Theme Editor",
+            "  - Click derecho para config",
+            "  - Fix toggle visual bugs"
+        };
+        for (int i = 0; i < lines.length && contentY + 8 < y + h; i++) {
+            if (w > 60) mc.fontRenderer.drawStringWithShadow(lines[i], x + PAD, contentY, i == 0 ? 0xFF66FF66 : 0xFFE0E0E0);
+            contentY += 10;
+        }
     }
 }

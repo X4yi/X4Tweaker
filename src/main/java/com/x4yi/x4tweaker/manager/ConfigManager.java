@@ -198,10 +198,6 @@ public class ConfigManager {
                 migrationReport.add("BetterAFK: Eat Duration -> Eat Until");
             }
         }
-
-        if (fromVersion < 4 && "ContainerPreview".equalsIgnoreCase(moduleName)) {
-            migrateContainerPreviewTiming(settings);
-        }
     }
 
     private int resolveMigrationIndex(String buildVersion, int legacyVersion) {
@@ -240,20 +236,4 @@ public class ConfigManager {
         } catch (Exception ignored) {}
     }
 
-    private void migrateContainerPreviewTiming(JsonObject settings) {
-        migrateMsToTicksSetting(settings, "Show Delay", 40);
-        migrateMsToTicksSetting(settings, "Refresh Rate", 40);
-    }
-
-    private void migrateMsToTicksSetting(JsonObject settings, String key, int clampMax) {
-        if (!settings.has(key)) return;
-        try {
-            double current = settings.get(key).getAsDouble();
-            if (current > clampMax) {
-                int ticks = (int) Math.max(0, Math.min(clampMax, Math.round(current / 50.0)));
-                settings.addProperty(key, ticks);
-                migrationReport.add("ContainerPreview: " + key + " ms -> ticks");
-            }
-        } catch (Exception ignored) {}
-    }
 }

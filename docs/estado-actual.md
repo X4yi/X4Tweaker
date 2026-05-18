@@ -1,4 +1,4 @@
-# Estado Actual (r1.0.3)
+# Estado Actual (r1.0.3b1)
 
 ## Resumen rápido
 
@@ -9,9 +9,9 @@
 - Pipeline de paquetes: `activo` (PacketEvent.Send/Receive vía Netty).
 - Localización: `en_us.lang` y `es_es.lang` completos.
 
-## Cambios en r1.0.3
+## Cambios en r1.0.3b1
 
-- Versión unificada a `r1.0.3` en todos los archivos.
+- Versión unificada a `r1.0.3b1` (beta 1) en todos los archivos.
 - Eliminado `HUDOverlay` (duplicado de `ActiveTweaks`).
 - Eliminado `CustomFontRenderer` (dead code con aloca de GPU sin uso).
 - UUID protegido en `TargetSelector` ahora es configurable vía builder (eliminado hardcode).
@@ -23,6 +23,19 @@
 - Agregadas traducciones de settings de Freecam y CameraDetach.
 - `FastCrafting` movido de `random_tweaks` a `tweaks`.
 - Calls redundantes de `RaytraceUtil.updateMouseOver` reducidas a una por fase de tick.
+
+## Cambios en r1.0.3b1 (fixes GUI/Cámara)
+
+- Fix conflicto CameraDetach/Freecam + MobInfo: whitelist de overlay types para evitar swaps innecesarios de renderViewEntity (elimina vignette corrupto y parpadeo de hotbar).
+- Eliminado módulo ContainerPreview (mala implementación, borrado del proyecto).
+- ThemeEditorGUI: previews ya no se solapan, layout dinámico con espacio calculado entre controles y área de preview.
+- ContentPanel: eliminado nested scissor roto, ahora usa beginClip/endClip outer correctamente.
+- Word wrap manual en textos de settings inline (ya no sobresalen del panel).
+- ThemeEditorGUI con scissor de ventana para evitar render fuera de bordes.
+- GLHelper: agregados pushScissor/popScissor con intersección de rectángulos para nested scissor correcto.
+- GuiPreviewRenderer: textos en thumbnails solo se renderizan si hay espacio suficiente.
+- UpdateChecker: detección automática de updates desde GitHub con badge en header del ClickGUI.
+- Eliminado ContainerPreview de docs, lang files, README, y config migration.
 
 ## Implementado
 
@@ -66,7 +79,7 @@
 - Botón `[X4]` inyectado en `GuiInventory`.
 - Hotfix de render aplicado para `Freecam`/`CameraDetach`: render local estable en cámara desacoplada y sin transparencia accidental.
 
-### Módulos (14 totales)
+### Módulos (13 totales)
 
 - `Fullbright`: implementado.
 - `PlayerESP`: implementado.
@@ -81,7 +94,6 @@
 - `Freecam`: implementado.
 - `CameraDetach`: implementado (Cinematic Drone, Absolute, FollowPlayer, bypass de paquetes servidor).
 - `MobInfo`: implementado (Billboard world-space de info de entidades con fade/distancia).
-- `ContainerPreview`: implementado (preview automática por apuntado, cache por ticks, layout robusto en pantalla).
 
 ### Incompatibilidades activas
 

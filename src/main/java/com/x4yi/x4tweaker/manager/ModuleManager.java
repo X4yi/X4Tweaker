@@ -11,7 +11,6 @@ import com.x4yi.x4tweaker.module.visuals.*;
 import com.x4yi.x4tweaker.module.utility.Freecam;
 import com.x4yi.x4tweaker.module.utility.CameraDetach;
 import com.x4yi.x4tweaker.module.utility.MobInfo;
-import com.x4yi.x4tweaker.module.utility.ContainerPreview;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,15 +34,11 @@ public class ModuleManager {
             new BetterAFK(),
             new Freecam(),
             new CameraDetach(),
-            new MobInfo(),
-            new ContainerPreview()
+            new MobInfo()
         );
 
         Module fastCrafting = getModuleByName("FastCrafting");
         if (fastCrafting != null) fastCrafting.setReleaseState(Module.ReleaseState.EXPERIMENTAL);
-
-        Module containerPreview = getModuleByName("ContainerPreview");
-        if (containerPreview != null) containerPreview.setReleaseState(Module.ReleaseState.EXPERIMENTAL);
 
         Module betterAfk = getModuleByName("BetterAFK");
         if (betterAfk != null) betterAfk.setReleaseState(Module.ReleaseState.EXPERIMENTAL);

@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class X4Tweaker {
     public static final String MODID = "x4tweaker";
     public static final String NAME = "X4Tweaker";
-    public static final String VERSION = "r1.0.3";
+    public static final String VERSION = "r1.0.3b1";
 
     @Mod.Instance
     public static X4Tweaker instance;

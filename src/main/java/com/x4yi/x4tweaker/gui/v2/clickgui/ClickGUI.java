@@ -9,6 +9,7 @@ import com.x4yi.x4tweaker.gui.v2.theme.ThemeEditorGUI;
 import com.x4yi.x4tweaker.gui.v2.utils.DrawHelper;
 import com.x4yi.x4tweaker.manager.ThemeManager;
 import com.x4yi.x4tweaker.module.Category;
+import com.x4yi.x4tweaker.utils.UpdateChecker;
 import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -23,6 +24,7 @@ public class ClickGUI extends GuiScreen {
     private static final int MIN_H = 260;
     private static final int MAX_H = 420;
     private static final int HEADER_H = 28;
+    private static final int FOOTER_H = 28;
     private static final int SIDEBAR_W = 100;
 
     private int windowX, windowY, windowW, windowH;
@@ -32,10 +34,12 @@ public class ClickGUI extends GuiScreen {
     private KeybindsContentPanel keybindsContentPanel;
     private MigrationBanner migrationBanner;
 
-    private int btnChangelogX1, btnChangelogY1, btnChangelogX2, btnChangelogY2;
-    private int btnThemeX1, btnThemeY1, btnThemeX2, btnThemeY2;
     private int btnCloseX1, btnCloseY1, btnCloseX2, btnCloseY2;
     private int btnPauseX1, btnPauseY1, btnPauseX2, btnPauseY2;
+
+    private int btnBottomChangelogX1, btnBottomChangelogY1, btnBottomChangelogX2, btnBottomChangelogY2;
+    private int btnBottomThemeX1, btnBottomThemeY1, btnBottomThemeX2, btnBottomThemeY2;
+    private int btnBottomUpdateX1, btnBottomUpdateY1, btnBottomUpdateX2, btnBottomUpdateY2;
 
     @Override
     public boolean doesGuiPauseGame() {
@@ -66,7 +70,7 @@ public class ClickGUI extends GuiScreen {
                 migrationBanner.setVisible(false);
             }
         });
-        sidebar.setBounds(windowX, windowY + HEADER_H, SIDEBAR_W, windowH - HEADER_H);
+        sidebar.setBounds(windowX, windowY + HEADER_H, SIDEBAR_W, windowH - HEADER_H - FOOTER_H);
 
         contentPanel = new ContentPanel(themeBridge, Category.VISUALS);
         contentPanel.setBounds(windowX + SIDEBAR_W, windowY + HEADER_H, windowW - SIDEBAR_W, windowH - HEADER_H);
@@ -75,16 +79,6 @@ public class ClickGUI extends GuiScreen {
         keybindsContentPanel = new KeybindsContentPanel(themeBridge, null);
         keybindsContentPanel.setBounds(windowX + SIDEBAR_W, windowY + HEADER_H, windowW - SIDEBAR_W, windowH - HEADER_H);
         keybindsContentPanel.setVisible(false);
-
-        btnChangelogX1 = windowX + windowW - 180;
-        btnChangelogY1 = windowY + 7;
-        btnChangelogX2 = btnChangelogX1 + 70;
-        btnChangelogY2 = btnChangelogY1 + 14;
-
-        btnThemeX1 = btnChangelogX2 + 6;
-        btnThemeY1 = windowY + 7;
-        btnThemeX2 = btnThemeX1 + 50;
-        btnThemeY2 = btnThemeY1 + 14;
 
         btnCloseX1 = windowX + windowW - 18;
         btnCloseY1 = windowY + 6;
@@ -98,19 +92,37 @@ public class ClickGUI extends GuiScreen {
             btnPauseY2 = btnPauseY1 + 14;
         }
 
+        int footerY = windowY + windowH - FOOTER_H;
+        btnBottomChangelogX1 = windowX + 10;
+        btnBottomChangelogY1 = footerY + 7;
+        btnBottomChangelogX2 = btnBottomChangelogX1 + 70;
+        btnBottomChangelogY2 = btnBottomChangelogY1 + 14;
+
+        btnBottomThemeX1 = btnBottomChangelogX2 + 6;
+        btnBottomThemeY1 = footerY + 7;
+        btnBottomThemeX2 = btnBottomThemeX1 + 50;
+        btnBottomThemeY2 = btnBottomThemeY1 + 14;
+
+        btnBottomUpdateX1 = windowX + windowW - 100;
+        btnBottomUpdateY1 = footerY + 5;
+        btnBottomUpdateX2 = btnBottomUpdateX1 + 80;
+        btnBottomUpdateY2 = btnBottomUpdateY1 + 18;
+
         migrationBanner = new MigrationBanner(themeBridge);
         List<String> report = X4TweakerClient.getInstance().getConfigManager().consumeMigrationReport();
         migrationBanner.setNotices(report.isEmpty() ? null : new ArrayList<String>(report));
 
         int bannerH = migrationBanner.hasNotices() ? 78 : 0;
         int contentTop = windowY + HEADER_H + bannerH;
-        int contentH = windowH - HEADER_H - bannerH;
+        int contentH = windowH - HEADER_H - FOOTER_H - bannerH;
         contentPanel.setBounds(windowX + SIDEBAR_W, contentTop, windowW - SIDEBAR_W, contentH);
         keybindsContentPanel.setBounds(windowX + SIDEBAR_W, contentTop, windowW - SIDEBAR_W, contentH);
 
         if (migrationBanner.hasNotices()) {
             migrationBanner.setBounds(windowX + SIDEBAR_W + 6, contentTop + 6, windowW - SIDEBAR_W - 14, 78);
         }
+
+        UpdateChecker.getInstance().check();
 
         Keyboard.enableRepeatEvents(true);
     }
@@ -120,6 +132,7 @@ public class ClickGUI extends GuiScreen {
         DrawHelper.drawBorderedRect(windowX - 1, windowY - 1, windowX + windowW + 1, windowY + windowH + 1, 1.5f, themeBridge.getBorderColor(), themeBridge.getBgColor());
         DrawHelper.drawRect(windowX, windowY, windowX + windowW, windowY + windowH, themeBridge.getBgColor());
         DrawHelper.drawGradientRectH(windowX, windowY, windowX + windowW, windowY + HEADER_H, themeBridge.getAccentDarkColor(), themeBridge.getAccentColor());
+        DrawHelper.drawGradientRectH(windowX, windowY + windowH - FOOTER_H, windowX + windowW, windowY + windowH, themeBridge.getAccentColor(), themeBridge.getAccentDarkColor());
 
         mc.fontRenderer.drawStringWithShadow("X4Tweaker", windowX + 10, windowY + 10, 0xFFFFFFFF);
         String ver = X4Tweaker.VERSION;
@@ -127,6 +140,21 @@ public class ClickGUI extends GuiScreen {
         mc.fontRenderer.drawStringWithShadow(ver, windowX + (windowW - verW) / 2, windowY + 10, 0x88AAAAAA);
 
         drawHeaderButtons(mouseX, mouseY);
+        drawFooterButtons(mouseX, mouseY);
+
+        if (UpdateChecker.getInstance().getState() == UpdateChecker.State.UPDATE_AVAILABLE) {
+            boolean updateHover = mouseX >= btnBottomUpdateX1 && mouseX <= btnBottomUpdateX2 && mouseY >= btnBottomUpdateY1 && mouseY <= btnBottomUpdateY2;
+            if (updateHover) {
+                String latestVer = UpdateChecker.getInstance().getLatestVersion();
+                String type = UpdateChecker.getInstance().isPrerelease() ? "Beta" : "Release";
+                List<String> tooltip = new ArrayList<String>();
+                tooltip.add("Update available: " + latestVer);
+                tooltip.add("Type: " + type);
+                tooltip.add("Click to open");
+                Tooltip.render(tooltip, mouseX, mouseY, this.width, this.height, themeBridge.getBgColor(), themeBridge.getBorderColor());
+            }
+        }
+
         sidebar.render(mouseX, mouseY, partialTicks);
 
         if (sidebar.getSelected() == Category.KEYBINDS) {
@@ -153,14 +181,6 @@ public class ClickGUI extends GuiScreen {
     }
 
     private void drawHeaderButtons(int mouseX, int mouseY) {
-        boolean changelogHover = mouseX >= btnChangelogX1 && mouseX <= btnChangelogX2 && mouseY >= btnChangelogY1 && mouseY <= btnChangelogY2;
-        DrawHelper.drawRect(btnChangelogX1, btnChangelogY1, btnChangelogX2, btnChangelogY2, changelogHover ? 0x44FFFFFF : 0x22000000);
-        mc.fontRenderer.drawStringWithShadow("Changelog", btnChangelogX1 + 4, btnChangelogY1 + 3, 0xFFFFFFFF);
-
-        boolean themeHover = mouseX >= btnThemeX1 && mouseX <= btnThemeX2 && mouseY >= btnThemeY1 && mouseY <= btnThemeY2;
-        DrawHelper.drawRect(btnThemeX1, btnThemeY1, btnThemeX2, btnThemeY2, themeHover ? 0x44FFFFFF : 0x22000000);
-        mc.fontRenderer.drawStringWithShadow("Theme", btnThemeX1 + 4, btnThemeY1 + 3, 0xFFFFFFFF);
-
         boolean closeHover = mouseX >= btnCloseX1 && mouseX <= btnCloseX2 && mouseY >= btnCloseY1 && mouseY <= btnCloseY2;
         mc.fontRenderer.drawStringWithShadow("\u2715", btnCloseX1 + 3, btnCloseY1 + 3, closeHover ? 0xFFFF5555 : 0xFFAAAAAA);
 
@@ -168,28 +188,61 @@ public class ClickGUI extends GuiScreen {
             boolean pauseHover = mouseX >= btnPauseX1 && mouseX <= btnPauseX2 && mouseY >= btnPauseY1 && mouseY <= btnPauseY2;
             DrawHelper.drawRect(btnPauseX1, btnPauseY1, btnPauseX2, btnPauseY2, pauseHover ? 0x44FFFFFF : 0x22FFFFFF);
             boolean paused = themeBridge.isEnablePause();
-            mc.fontRenderer.drawStringWithShadow("P:" + (paused ? "ON" : "OFF"), btnPauseX1 + 4, btnPauseY1 + 3, paused ? 0xFF55FF55 : 0xFFFF5555);
+            mc.fontRenderer.drawStringWithShadow(paused ? "\u25B6" : "\u23F8", btnPauseX1 + 14, btnPauseY1 + 2, paused ? 0xFF55FF55 : 0xFFFF5555);
+            mc.fontRenderer.drawStringWithShadow("Pause", btnPauseX1 + 4, btnPauseY1 + 2, 0xFFAAAAAA);
+        }
+    }
+
+    private void drawFooterButtons(int mouseX, int mouseY) {
+        boolean changelogHover = mouseX >= btnBottomChangelogX1 && mouseX <= btnBottomChangelogX2 && mouseY >= btnBottomChangelogY1 && mouseY <= btnBottomChangelogY2;
+        DrawHelper.drawRect(btnBottomChangelogX1, btnBottomChangelogY1, btnBottomChangelogX2, btnBottomChangelogY2, changelogHover ? 0x44FFFFFF : 0x22000000);
+        mc.fontRenderer.drawStringWithShadow("Changelog", btnBottomChangelogX1 + 4, btnBottomChangelogY1 + 3, 0xFFFFFFFF);
+
+        boolean themeHover = mouseX >= btnBottomThemeX1 && mouseX <= btnBottomThemeX2 && mouseY >= btnBottomThemeY1 && mouseY <= btnBottomThemeY2;
+        DrawHelper.drawRect(btnBottomThemeX1, btnBottomThemeY1, btnBottomThemeX2, btnBottomThemeY2, themeHover ? 0x44FFFFFF : 0x22000000);
+        mc.fontRenderer.drawStringWithShadow("Theme", btnBottomThemeX1 + 4, btnBottomThemeY1 + 3, 0xFFFFFFFF);
+
+        UpdateChecker.State updateState = UpdateChecker.getInstance().getState();
+        if (updateState == UpdateChecker.State.UPDATE_AVAILABLE) {
+            boolean updateHover = mouseX >= btnBottomUpdateX1 && mouseX <= btnBottomUpdateX2 && mouseY >= btnBottomUpdateY1 && mouseY <= btnBottomUpdateY2;
+            String ver = UpdateChecker.getInstance().getLatestVersion();
+            boolean isBeta = UpdateChecker.getInstance().isPrerelease();
+            int bgColor = isBeta ? (updateHover ? 0xFFDDCC00 : 0xFFCCAA00) : (updateHover ? 0xFF66FF66 : 0xFF55FF55);
+            DrawHelper.drawBorderedRect(btnBottomUpdateX1, btnBottomUpdateY1, btnBottomUpdateX2, btnBottomUpdateY2, 1.0f, 0xFF888888, bgColor);
+            mc.fontRenderer.drawStringWithShadow("\u2191 " + ver, btnBottomUpdateX1 + 6, btnBottomUpdateY1 + 3, 0xFF000000);
+        } else if (updateState == UpdateChecker.State.CHECKING) {
+            DrawHelper.drawBorderedRect(btnBottomUpdateX1, btnBottomUpdateY1, btnBottomUpdateX2, btnBottomUpdateY2, 1.0f, 0xFF666666, 0x44888888);
+            mc.fontRenderer.drawStringWithShadow("\u27F3 Checking...", btnBottomUpdateX1 + 6, btnBottomUpdateY1 + 3, 0xFFCCCCCC);
         }
     }
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if (mouseButton == 0) {
-            if (mouseX >= btnChangelogX1 && mouseX <= btnChangelogX2 && mouseY >= btnChangelogY1 && mouseY <= btnChangelogY2) {
+            if (mouseX >= btnBottomChangelogX1 && mouseX <= btnBottomChangelogX2 && mouseY >= btnBottomChangelogY1 && mouseY <= btnBottomChangelogY2) {
                 mc.displayGuiScreen(new ChangelogScreen(this));
                 return;
             }
-            if (mouseX >= btnThemeX1 && mouseX <= btnThemeX2 && mouseY >= btnThemeY1 && mouseY <= btnThemeY2) {
+            if (mouseX >= btnBottomThemeX1 && mouseX <= btnBottomThemeX2 && mouseY >= btnBottomThemeY1 && mouseY <= btnBottomThemeY2) {
                 mc.displayGuiScreen(new ThemeEditorGUI(this, themeBridge));
                 return;
             }
-            if (mouseX >= btnCloseX1 && mouseX <= btnCloseX2 && mouseY >= btnCloseY1 && mouseY <= btnCloseY2) {
-                mc.displayGuiScreen(null);
+            if (mouseX >= btnBottomUpdateX1 && mouseX <= btnBottomUpdateX2 && mouseY >= btnBottomUpdateY1 && mouseY <= btnBottomUpdateY2) {
+                String url = UpdateChecker.getInstance().getLatestUrl();
+                if (url != null) {
+                    try {
+                        java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+                    } catch (Exception ignored) {}
+                }
                 return;
             }
             if (mc.isSingleplayer() && mouseX >= btnPauseX1 && mouseX <= btnPauseX2 && mouseY >= btnPauseY1 && mouseY <= btnPauseY2) {
                 themeBridge.setEnablePause(!themeBridge.isEnablePause());
                 themeBridge.save();
+                return;
+            }
+            if (mouseX >= btnCloseX1 && mouseX <= btnCloseX2 && mouseY >= btnCloseY1 && mouseY <= btnCloseY2) {
+                mc.displayGuiScreen(null);
                 return;
             }
         }

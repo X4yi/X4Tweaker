@@ -155,6 +155,7 @@ public abstract class DetachedCameraModule extends Module {
     public void onOverlayPre(RenderGameOverlayEvent.Pre event) {
         if (!isDetachedActive()) return;
         if (overlayBackupViewEntity != null) return;
+        if (!needsPlayerViewEntity(event.getType())) return;
         overlayBackupViewEntity = mc.getRenderViewEntity();
         mc.setRenderViewEntity(mc.player);
     }
@@ -164,6 +165,25 @@ public abstract class DetachedCameraModule extends Module {
         if (overlayBackupViewEntity == null) return;
         mc.setRenderViewEntity(overlayBackupViewEntity);
         overlayBackupViewEntity = null;
+    }
+
+    private static boolean needsPlayerViewEntity(RenderGameOverlayEvent.ElementType type) {
+        switch (type) {
+            case HOTBAR:
+            case HEALTH:
+            case ARMOR:
+            case FOOD:
+            case AIR:
+            case EXPERIENCE:
+            case HEALTHMOUNT:
+            case JUMPBAR:
+            case CROSSHAIRS:
+            case BOSSHEALTH:
+            case PORTAL:
+                return true;
+            default:
+                return false;
+        }
     }
 
     @SubscribeEvent
