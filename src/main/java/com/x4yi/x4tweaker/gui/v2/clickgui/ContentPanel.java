@@ -4,11 +4,14 @@ import com.x4yi.x4tweaker.core.X4TweakerClient;
 import com.x4yi.x4tweaker.gui.v2.framework.ScrollablePanel;
 import com.x4yi.x4tweaker.gui.v2.framework.ThemeBridge;
 import com.x4yi.x4tweaker.gui.v2.utils.DrawHelper;
+import com.x4yi.x4tweaker.gui.v2.utils.GLHelper;
 import com.x4yi.x4tweaker.gui.v2.utils.MathHelper;
 import com.x4yi.x4tweaker.module.Category;
 import com.x4yi.x4tweaker.module.Module;
 import com.x4yi.x4tweaker.setting.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,18 +88,34 @@ public class ContentPanel extends ScrollablePanel {
             if (anim > 0.01f && row.getModule().isImplemented() && !row.getModule().getSettings().isEmpty()) {
                 int panelTop = curY;
                 int panelBottom = curY + animH;
-                DrawHelper.drawBorderedRect(contentX + 4, curY, contentX + contentW, curY + animH, 1.0f, theme.getSeparatorColor(), theme.getSettingsPanelColor());
+
+                DrawHelper.drawBorderedRect(contentX + 4, panelTop, contentX + contentW, panelBottom, 1.0f, theme.getSeparatorColor(), theme.getSettingsPanelColor());
+
+                int clipH = Math.max(0, animH);
+                if (clipH > 0) {
+                    ScaledResolution sr = new ScaledResolution(mc);
+                    int scale = sr.getScaleFactor();
+                    int glY = mc.displayHeight - (panelTop + clipH) * scale;
+                    GL11.glEnable(GL11.GL_SCISSOR_TEST);
+                    GL11.glScissor((contentX + 4) * scale, glY, (contentW - 4) * scale, clipH * scale);
+                }
 
                 int setY = curY + 2;
                 for (Setting<?> s : row.getModule().getSettings()) {
                     if (!s.isVisible()) continue;
                     int rowH = getSettingHeight(s);
-                    if (setY + rowH >= vpTop && setY <= vpBot) {
+                    int settingBottom = setY + rowH;
+                    if (settingBottom > panelTop && setY < panelTop + clipH) {
                         renderSettingInline(s, contentX, setY, contentW, mouseX, mouseY);
                     }
                     setY += rowH + 2;
                     totalH += rowH + 2;
                 }
+
+                if (clipH > 0) {
+                    GL11.glDisable(GL11.GL_SCISSOR_TEST);
+                }
+
                 curY += animH + 4;
                 totalH += animH + 4;
             }

@@ -10,16 +10,17 @@ import net.minecraft.client.Minecraft;
 import java.awt.Color;
 
 public class ColorSlotList implements GuiComponent {
-    private static final int ITEM_H = 22;
+    private static final int ITEM_HEIGHT = 22;
     private static final int SWATCH_SIZE = 12;
     private static final int PAD = 4;
 
     private int x, y, width, height;
     private boolean visible = true;
+    private int priority = 0;
     private final ThemeBridge theme;
     private final Minecraft mc;
     private final ScrollablePanel scrollPanel;
-    private int selectedIndex = -1;
+    private int selectedSlotIndex = -1;
     private final Runnable onSelect;
 
     public ColorSlotList(ThemeBridge theme, Runnable onSelect) {
@@ -29,9 +30,8 @@ public class ColorSlotList implements GuiComponent {
         this.scrollPanel = new ScrollablePanel(0.2f);
     }
 
-    public int getSelectedIndex() { return selectedIndex; }
-
-    public void setSelectedIndex(int idx) { this.selectedIndex = idx; }
+    public int getSelectedIndex() { return selectedSlotIndex; }
+    public void setSelectedIndex(int idx) { this.selectedSlotIndex = idx; }
 
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
@@ -43,14 +43,14 @@ public class ColorSlotList implements GuiComponent {
         int curY = y + (int)scrollPanel.getScrollOffset();
         int totalH = 0;
         for (int i = 0; i < theme.getColorCount(); i++) {
-            boolean isSelected = i == selectedIndex;
-            boolean hover = mouseX >= x && mouseX <= x + width && mouseY >= curY && mouseY <= curY + ITEM_H;
+            boolean isSelected = i == selectedSlotIndex;
+            boolean hover = mouseX >= x && mouseX <= x + width && mouseY >= curY && mouseY <= curY + ITEM_HEIGHT;
 
             int bg = isSelected ? theme.getSurfaceHoverColor() : (hover ? theme.getSurfaceColor() : 0x00000000);
-            DrawHelper.drawRect(x, curY, x + width, curY + ITEM_H, bg);
+            DrawHelper.drawRect(x, curY, x + width, curY + ITEM_HEIGHT, bg);
 
             int swatchX = x + PAD;
-            int swatchY = curY + (ITEM_H - SWATCH_SIZE) / 2;
+            int swatchY = curY + (ITEM_HEIGHT - SWATCH_SIZE) / 2;
             int rgb = theme.getColorByIndex(i).getRGB();
             DrawHelper.drawBorderedRect(swatchX, swatchY, swatchX + SWATCH_SIZE, swatchY + SWATCH_SIZE, 1.0f, 0xFF000000, rgb);
 
@@ -61,8 +61,8 @@ public class ColorSlotList implements GuiComponent {
             int hexW = mc.fontRenderer.getStringWidth(hex);
             mc.fontRenderer.drawStringWithShadow(hex, x + width - hexW - PAD, curY + 6, 0xFF888888);
 
-            curY += ITEM_H;
-            totalH += ITEM_H;
+            curY += ITEM_HEIGHT;
+            totalH += ITEM_HEIGHT;
         }
         scrollPanel.setContentHeight(totalH);
         scrollPanel.recalcMaxScroll(height);
@@ -74,12 +74,12 @@ public class ColorSlotList implements GuiComponent {
         if (!visible || button != 0 || !contains(mouseX, mouseY)) return false;
         int curY = y + (int)scrollPanel.getScrollOffset();
         for (int i = 0; i < theme.getColorCount(); i++) {
-            if (mouseY >= curY && mouseY <= curY + ITEM_H) {
-                selectedIndex = i;
+            if (mouseY >= curY && mouseY <= curY + ITEM_HEIGHT) {
+                selectedSlotIndex = i;
                 if (onSelect != null) onSelect.run();
                 return true;
             }
-            curY += ITEM_H;
+            curY += ITEM_HEIGHT;
         }
         return false;
     }
@@ -121,7 +121,7 @@ public class ColorSlotList implements GuiComponent {
     @Override
     public void setVisible(boolean visible) { this.visible = visible; }
     @Override
-    public int getPriority() { return 0; }
+    public int getPriority() { return priority; }
     @Override
-    public void setPriority(int priority) {}
+    public void setPriority(int priority) { this.priority = priority; }
 }

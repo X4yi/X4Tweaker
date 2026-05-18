@@ -7,8 +7,8 @@ import com.x4yi.x4tweaker.gui.v2.framework.ThemeBridge;
 import com.x4yi.x4tweaker.gui.v2.utils.DrawHelper;
 import com.x4yi.x4tweaker.gui.v2.utils.GLHelper;
 import com.x4yi.x4tweaker.module.Module;
-import com.x4yi.x4tweaker.module.client.ClickGUIModule;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.resources.I18n;
 import org.lwjgl.input.Keyboard;
 
@@ -17,11 +17,12 @@ import java.util.List;
 public class KeybindOverlay implements GuiComponent {
     private static final int PANEL_W = 220;
     private static final int PANEL_H = 220;
-    private static final int ITEM_H = 14;
+    private static final int ITEM_HEIGHT = 14;
     private static final int PAD = 10;
 
     private int x, y, width, height;
     private boolean visible = true;
+    private int priority = 200;
     private final ThemeBridge theme;
     private final Minecraft mc;
     private final Runnable onClose;
@@ -36,15 +37,20 @@ public class KeybindOverlay implements GuiComponent {
         this.onClose = onClose;
         this.width = PANEL_W;
         this.height = PANEL_H;
-        this.x = (mc.displayWidth - width) / 2;
-        this.y = (mc.displayHeight - height) / 2;
+        ScaledResolution sr = new ScaledResolution(mc);
+        this.x = (sr.getScaledWidth() - width) / 2;
+        this.y = (sr.getScaledHeight() - height) / 2;
         this.scrollPanel = new ScrollablePanel(0.2f);
     }
 
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
         if (!visible) return;
-        DrawHelper.drawRect(0, 0, mc.displayWidth, mc.displayHeight, 0xAA000000);
+        ScaledResolution sr = new ScaledResolution(mc);
+        int screenW = sr.getScaledWidth();
+        int screenH = sr.getScaledHeight();
+
+        DrawHelper.drawRect(0, 0, screenW, screenH, 0xAA000000);
         DrawHelper.drawBorderedRect(x - 1, y - 1, x + width + 1, y + height + 1, 1.5f, theme.getBorderColor(), theme.getBgColor());
         DrawHelper.drawRect(x, y, x + width, y + height, theme.getBgColor());
         mc.fontRenderer.drawStringWithShadow("Add Keybind", x + PAD, y + PAD, 0xFFFFFFFF);
@@ -66,18 +72,17 @@ public class KeybindOverlay implements GuiComponent {
         int totalH = 0;
         List<Module> modules = X4TweakerClient.getInstance().getModuleManager().getModules();
         for (Module m : modules) {
-            if (m instanceof ClickGUIModule) continue;
             boolean isSelected = bindingModule == m;
-            boolean hover = mouseX >= x + PAD && mouseX <= x + PAD + listW && mouseY >= curY && mouseY <= curY + ITEM_H;
+            boolean hover = mouseX >= x + PAD && mouseX <= x + PAD + listW && mouseY >= curY && mouseY <= curY + ITEM_HEIGHT;
             if (isSelected) {
-                DrawHelper.drawRect(x + PAD, curY, x + PAD + listW, curY + ITEM_H, theme.getEnabledColor());
+                DrawHelper.drawRect(x + PAD, curY, x + PAD + listW, curY + ITEM_HEIGHT, theme.getEnabledColor());
             } else if (hover) {
-                DrawHelper.drawRect(x + PAD, curY, x + PAD + listW, curY + ITEM_H, theme.getSurfaceHoverColor());
+                DrawHelper.drawRect(x + PAD, curY, x + PAD + listW, curY + ITEM_HEIGHT, theme.getSurfaceHoverColor());
             }
             String name = getDisplayName(m);
             mc.fontRenderer.drawStringWithShadow(name, x + PAD + 4, curY + 3, isSelected ? 0xFFFFFFFF : 0xFFCCCCCC);
-            curY += ITEM_H;
-            totalH += ITEM_H;
+            curY += ITEM_HEIGHT;
+            totalH += ITEM_HEIGHT;
         }
         scrollPanel.setContentHeight(totalH);
         scrollPanel.recalcMaxScroll(listH);
@@ -103,12 +108,11 @@ public class KeybindOverlay implements GuiComponent {
         int curY = listTop + (int)scrollPanel.getScrollOffset();
         List<Module> modules = X4TweakerClient.getInstance().getModuleManager().getModules();
         for (Module m : modules) {
-            if (m instanceof ClickGUIModule) continue;
-            if (mouseY >= curY && mouseY <= curY + ITEM_H && mouseX >= x + PAD && mouseX <= x + PAD + listW) {
+            if (mouseY >= curY && mouseY <= curY + ITEM_HEIGHT && mouseX >= x + PAD && mouseX <= x + PAD + listW) {
                 bindingModule = m;
                 return true;
             }
-            curY += ITEM_H;
+            curY += ITEM_HEIGHT;
         }
 
         int btnY = y + height - PAD - 20;
@@ -169,9 +173,9 @@ public class KeybindOverlay implements GuiComponent {
     @Override
     public void setVisible(boolean visible) { this.visible = visible; }
     @Override
-    public int getPriority() { return 200; }
+    public int getPriority() { return priority; }
     @Override
-    public void setPriority(int priority) {}
+    public void setPriority(int priority) { this.priority = priority; }
 
     public void handleMouseWheel(int dWheel) {
         scrollPanel.handleMouseWheel(dWheel);

@@ -9,9 +9,11 @@ import net.minecraft.client.Minecraft;
 import java.util.Locale;
 
 public class SidebarPanel implements GuiComponent {
-    private static final int ITEM_H = 20;
+    private static final int CATEGORY_ITEM_H = 20;
     private static final int PAD_X = 8;
     private static final int PAD_TOP = 6;
+    private static final int PAD_BOTTOM = 6;
+    private static final int SEPARATOR_H = 2;
 
     private int x, y, width, height;
     private boolean visible = true;
@@ -47,21 +49,36 @@ public class SidebarPanel implements GuiComponent {
 
         int curY = y + PAD_TOP;
         for (Category cat : Category.values()) {
-            if (cat == Category.HIDDEN || cat == Category.THEME) continue;
+            if (cat == Category.HIDDEN || cat == Category.THEME || cat == Category.KEYBINDS) continue;
             boolean isSelected = cat == selected;
-            boolean hover = mouseX >= x && mouseX <= x + width && mouseY >= curY && mouseY <= curY + ITEM_H;
+            boolean hover = mouseX >= x && mouseX <= x + width && mouseY >= curY && mouseY <= curY + CATEGORY_ITEM_H;
 
             if (isSelected) {
-                DrawHelper.drawRect(x, curY, x + 3, curY + ITEM_H, theme.getAccentColor());
-                DrawHelper.drawRect(x + 3, curY, x + width, curY + ITEM_H, theme.getSurfaceHoverColor());
+                DrawHelper.drawRect(x, curY, x + 3, curY + CATEGORY_ITEM_H, theme.getAccentColor());
+                DrawHelper.drawRect(x + 3, curY, x + width, curY + CATEGORY_ITEM_H, theme.getSurfaceHoverColor());
             } else if (hover) {
-                DrawHelper.drawRect(x, curY, x + width, curY + ITEM_H, theme.getSurfaceColor());
+                DrawHelper.drawRect(x, curY, x + width, curY + CATEGORY_ITEM_H, theme.getSurfaceColor());
             }
 
             String label = formatCategory(cat);
             mc.fontRenderer.drawStringWithShadow(label, x + PAD_X, curY + 6, isSelected ? 0xFFFFFFFF : 0xFF999999);
-            curY += ITEM_H;
+            curY += CATEGORY_ITEM_H;
         }
+
+        int keybindY = y + height - CATEGORY_ITEM_H - PAD_BOTTOM;
+        boolean kbSelected = selected == Category.KEYBINDS;
+        boolean kbHover = mouseX >= x && mouseX <= x + width && mouseY >= keybindY && mouseY <= keybindY + CATEGORY_ITEM_H;
+
+        DrawHelper.drawRect(x, keybindY - SEPARATOR_H, x + width, keybindY, theme.getSeparatorColor());
+
+        if (kbSelected) {
+            DrawHelper.drawRect(x, keybindY, x + 3, keybindY + CATEGORY_ITEM_H, theme.getAccentColor());
+            DrawHelper.drawRect(x + 3, keybindY, x + width, keybindY + CATEGORY_ITEM_H, theme.getSurfaceHoverColor());
+        } else if (kbHover) {
+            DrawHelper.drawRect(x, keybindY, x + width, keybindY + CATEGORY_ITEM_H, theme.getSurfaceColor());
+        }
+
+        mc.fontRenderer.drawStringWithShadow("Keybinds", x + PAD_X, keybindY + 6, kbSelected ? 0xFFFFFFFF : 0xFF999999);
     }
 
     @Override
@@ -69,14 +86,22 @@ public class SidebarPanel implements GuiComponent {
         if (!visible || button != 0 || !contains(mouseX, mouseY)) return false;
         int curY = y + PAD_TOP;
         for (Category cat : Category.values()) {
-            if (cat == Category.HIDDEN || cat == Category.THEME) continue;
-            if (mouseY >= curY && mouseY <= curY + ITEM_H) {
+            if (cat == Category.HIDDEN || cat == Category.THEME || cat == Category.KEYBINDS) continue;
+            if (mouseY >= curY && mouseY <= curY + CATEGORY_ITEM_H) {
                 selected = cat;
                 if (onSelect != null) onSelect.onCategorySelected(cat);
                 return true;
             }
-            curY += ITEM_H;
+            curY += CATEGORY_ITEM_H;
         }
+
+        int keybindY = y + height - CATEGORY_ITEM_H - PAD_BOTTOM;
+        if (mouseY >= keybindY && mouseY <= keybindY + CATEGORY_ITEM_H) {
+            selected = Category.KEYBINDS;
+            if (onSelect != null) onSelect.onCategorySelected(Category.KEYBINDS);
+            return true;
+        }
+
         return false;
     }
 

@@ -6,7 +6,7 @@ import com.x4yi.x4tweaker.gui.v2.utils.DrawHelper;
 import net.minecraft.client.Minecraft;
 
 public class PreviewControlPanel implements GuiComponent {
-    private static final int ROW_H = 14;
+    private static final int ROW_HEIGHT = 14;
     private static final int PAD = 4;
 
     private int x, y, width, height;
@@ -15,13 +15,13 @@ public class PreviewControlPanel implements GuiComponent {
     private final ThemeBridge theme;
     private final Minecraft mc;
 
-    public boolean showClickGUI = true;
-    public boolean showChangelog = true;
-    public boolean editAll = true;
-    public int selectedGuiIndex = 0;
+    public boolean showClickGUIPreview = true;
+    public boolean showChangelogPreview = true;
+    public boolean editAllGUIs = true;
+    public int selectedGUIIndex = 0;
 
     private final String[] guiNames = {"ClickGUI", "Changelog"};
-    private int checkX, editX;
+    private int radioEditX;
     private boolean[] hoverStates = new boolean[5];
 
     public PreviewControlPanel(ThemeBridge theme) {
@@ -36,33 +36,33 @@ public class PreviewControlPanel implements GuiComponent {
 
         int curY = y + PAD;
 
-        hoverStates[0] = isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_H);
-        drawCheckbox(x + PAD, curY, showClickGUI, "ClickGUI Preview", hoverStates[0]);
-        curY += ROW_H;
+        hoverStates[0] = isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_HEIGHT);
+        drawCheckbox(x + PAD, curY, showClickGUIPreview, "ClickGUI Preview", hoverStates[0]);
+        curY += ROW_HEIGHT;
 
-        hoverStates[1] = isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_H);
-        drawCheckbox(x + PAD, curY, showChangelog, "Changelog Preview", hoverStates[1]);
-        curY += ROW_H + 2;
+        hoverStates[1] = isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_HEIGHT);
+        drawCheckbox(x + PAD, curY, showChangelogPreview, "Changelog Preview", hoverStates[1]);
+        curY += ROW_HEIGHT + 2;
 
         DrawHelper.drawRect(x + PAD, curY, x + width - PAD, curY + 1, theme.getSeparatorColor());
         curY += 4;
 
         mc.fontRenderer.drawStringWithShadow("Editar:", x + PAD, curY + 2, 0xFFCCCCCC);
-        editX = x + PAD + mc.fontRenderer.getStringWidth("Editar:") + 4;
+        radioEditX = x + PAD + mc.fontRenderer.getStringWidth("Editar:") + 4;
 
-        hoverStates[2] = isInside(mouseX, mouseY, editX, curY, 40, ROW_H);
-        drawRadio(editX, curY, editAll, "Todas", hoverStates[2]);
+        hoverStates[2] = isInside(mouseX, mouseY, radioEditX, curY, 40, ROW_HEIGHT);
+        drawRadio(radioEditX, curY, editAllGUIs, "Todas", hoverStates[2]);
 
-        hoverStates[3] = isInside(mouseX, mouseY, editX + 44, curY, 50, ROW_H);
-        drawRadio(editX + 44, curY, !editAll, "Por GUI", hoverStates[3]);
-        curY += ROW_H;
+        hoverStates[3] = isInside(mouseX, mouseY, radioEditX + 44, curY, 50, ROW_HEIGHT);
+        drawRadio(radioEditX + 44, curY, !editAllGUIs, "Por GUI", hoverStates[3]);
+        curY += ROW_HEIGHT;
 
-        if (!editAll) {
-            hoverStates[4] = isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_H);
-            String label = "GUI: " + guiNames[selectedGuiIndex] + " \u25BC";
+        if (!editAllGUIs) {
+            hoverStates[4] = isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_HEIGHT);
+            String label = "GUI: " + guiNames[selectedGUIIndex] + " \u25BC";
             int labelW = mc.fontRenderer.getStringWidth(label);
             boolean hover = hoverStates[4];
-            DrawHelper.drawRect(x + PAD, curY, x + PAD + labelW + 8, curY + ROW_H, hover ? theme.getSurfaceHoverColor() : theme.getSurfaceColor());
+            DrawHelper.drawRect(x + PAD, curY, x + PAD + labelW + 8, curY + ROW_HEIGHT, hover ? theme.getSurfaceHoverColor() : theme.getSurfaceColor());
             mc.fontRenderer.drawStringWithShadow(label, x + PAD + 4, curY + 3, 0xFFFFFFFF);
         }
 
@@ -90,30 +90,30 @@ public class PreviewControlPanel implements GuiComponent {
         if (!visible || button != 0) return false;
         int curY = y + PAD;
 
-        if (isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_H)) {
-            showClickGUI = !showClickGUI;
+        if (isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_HEIGHT)) {
+            showClickGUIPreview = !showClickGUIPreview;
             return true;
         }
-        curY += ROW_H;
+        curY += ROW_HEIGHT;
 
-        if (isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_H)) {
-            showChangelog = !showChangelog;
+        if (isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_HEIGHT)) {
+            showChangelogPreview = !showChangelogPreview;
             return true;
         }
-        curY += ROW_H + 6;
+        curY += ROW_HEIGHT + 6;
 
-        if (isInside(mouseX, mouseY, editX, curY, 40, ROW_H)) {
-            editAll = true;
+        if (isInside(mouseX, mouseY, radioEditX, curY, 40, ROW_HEIGHT)) {
+            editAllGUIs = true;
             return true;
         }
-        if (isInside(mouseX, mouseY, editX + 44, curY, 50, ROW_H)) {
-            editAll = false;
+        if (isInside(mouseX, mouseY, radioEditX + 44, curY, 50, ROW_HEIGHT)) {
+            editAllGUIs = false;
             return true;
         }
-        curY += ROW_H;
+        curY += ROW_HEIGHT;
 
-        if (!editAll && isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_H)) {
-            selectedGuiIndex = (selectedGuiIndex + 1) % guiNames.length;
+        if (!editAllGUIs && isInside(mouseX, mouseY, x + PAD, curY, width - PAD * 2, ROW_HEIGHT)) {
+            selectedGUIIndex = (selectedGUIIndex + 1) % guiNames.length;
             return true;
         }
 
