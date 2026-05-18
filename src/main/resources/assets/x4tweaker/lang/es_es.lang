@@ -34,6 +34,10 @@ x4tweaker.module.mobinfo.name=Info de Mobs
 x4tweaker.module.mobinfo.desc=Etiquetas flotantes de entidades en el mundo
 x4tweaker.module.containerpreview.name=Preview de Contenedor
 x4tweaker.module.containerpreview.desc=Preview automático al apuntar a contenedores
+x4tweaker.module.freecam.name=Freecam
+x4tweaker.module.freecam.desc=Cámara libre estilo espectador
+x4tweaker.module.cameradetach.name=Cámara Desacoplada
+x4tweaker.module.cameradetach.desc=Desacopla la cámara manteniendo control del jugador
 
 x4tweaker.setting.mobesp.max_distance.name=Distancia Máxima
 x4tweaker.setting.mobesp.max_distance.desc=Distancia máxima para renderizar el ESP de mobs
@@ -146,3 +150,23 @@ x4tweaker.setting.betterafk.max_chase_distance.name=Distancia Máx. Persecución
 x4tweaker.setting.betterafk.max_chase_distance.desc=Distancia máxima de persecución desde el punto AFK
 x4tweaker.setting.betterafk.avoid_mobs_in_path.name=Evitar Mobs en Camino
 x4tweaker.setting.betterafk.avoid_mobs_in_path.desc=Esquivar otros mobs al perseguir al agresor
+
+# === SETTINGS: Freecam ===
+
+x4tweaker.setting.freecam.speed.name=Velocidad
+x4tweaker.setting.freecam.speed.desc=Velocidad de vuelo
+x4tweaker.setting.freecam.vertical_speed.name=Velocidad Vertical
+x4tweaker.setting.freecam.vertical_speed.desc=Velocidad de movimiento vertical
+x4tweaker.setting.freecam.render_player.name=Renderizar Jugador
+x4tweaker.setting.freecam.render_player.desc=Muestra el modelo real del jugador
+x4tweaker.setting.freecam.freeze_rotations.name=Congelar Rotaciones
+x4tweaker.setting.freecam.freeze_rotations.desc=Congela la rotación de cámara del jugador
+
+# === SETTINGS: CameraDetach ===
+
+x4tweaker.setting.cameradetach.lock_mode.name=Modo de Bloqueo
+x4tweaker.setting.cameradetach.lock_mode.desc=Comportamiento de bloqueo de cámara
+x4tweaker.setting.cameradetach.smooth_speed.name=Suavidad
+x4tweaker.setting.cameradetach.smooth_speed.desc=Suavidad de cámara
+x4tweaker.setting.cameradetach.pan_speed.name=Velocidad de Paneo
+x4tweaker.setting.cameradetach.pan_speed.desc=Velocidad de paneo manual

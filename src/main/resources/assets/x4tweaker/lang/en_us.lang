@@ -34,6 +34,10 @@ x4tweaker.module.mobinfo.name=Mob Info
 x4tweaker.module.mobinfo.desc=Floating world-space entity info labels
 x4tweaker.module.containerpreview.name=Container Preview
 x4tweaker.module.containerpreview.desc=Automatic container preview when aiming at blocks
+x4tweaker.module.freecam.name=Freecam
+x4tweaker.module.freecam.desc=Free spectator-style camera
+x4tweaker.module.cameradetach.name=Camera Detach
+x4tweaker.module.cameradetach.desc=Detached camera while keeping player control
 
 x4tweaker.setting.mobesp.max_distance.name=Max Distance
 x4tweaker.setting.mobesp.max_distance.desc=Maximum distance to render mob ESP
@@ -146,3 +150,23 @@ x4tweaker.setting.betterafk.max_chase_distance.name=Max Chase Distance
 x4tweaker.setting.betterafk.max_chase_distance.desc=Maximum pursuit distance from AFK point
 x4tweaker.setting.betterafk.avoid_mobs_in_path.name=Avoid Mobs In Path
 x4tweaker.setting.betterafk.avoid_mobs_in_path.desc=Dodge other mobs when chasing the aggressor
+
+# === SETTINGS: Freecam ===
+
+x4tweaker.setting.freecam.speed.name=Speed
+x4tweaker.setting.freecam.speed.desc=Flight speed
+x4tweaker.setting.freecam.vertical_speed.name=Vertical Speed
+x4tweaker.setting.freecam.vertical_speed.desc=Vertical movement speed
+x4tweaker.setting.freecam.render_player.name=Render Player
+x4tweaker.setting.freecam.render_player.desc=Show the real player model
+x4tweaker.setting.freecam.freeze_rotations.name=Freeze Rotations
+x4tweaker.setting.freecam.freeze_rotations.desc=Freeze player camera rotation
+
+# === SETTINGS: CameraDetach ===
+
+x4tweaker.setting.cameradetach.lock_mode.name=Lock Mode
+x4tweaker.setting.cameradetach.lock_mode.desc=Camera lock behavior
+x4tweaker.setting.cameradetach.smooth_speed.name=Smooth Speed
+x4tweaker.setting.cameradetach.smooth_speed.desc=Camera smoothness
+x4tweaker.setting.cameradetach.pan_speed.name=Pan Speed
+x4tweaker.setting.cameradetach.pan_speed.desc=Manual panning speed

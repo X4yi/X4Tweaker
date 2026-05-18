@@ -91,45 +91,40 @@ public class MobInfo extends Module {
         final float partial = mc.getRenderPartialTicks();
         final double maxDistSq = maxDistance.getValue() * maxDistance.getValue();
 
-        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
         GlStateManager.pushMatrix();
-        try {
-            GlStateManager.enableBlend();
-            GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
-            GlStateManager.disableLighting();
-            GlStateManager.depthMask(false);
-            if (throughWalls.getValue()) GlStateManager.disableDepth();
-            else GlStateManager.enableDepth();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
+        GlStateManager.disableLighting();
+        GlStateManager.depthMask(false);
+        if (throughWalls.getValue()) GlStateManager.disableDepth();
+        else GlStateManager.enableDepth();
 
-            Entity viewEntity = mc.getRenderViewEntity();
-            if (viewEntity == null) viewEntity = mc.player;
+        Entity viewEntity = mc.getRenderViewEntity();
+        if (viewEntity == null) viewEntity = mc.player;
 
-            for (int i = 0, size = renderTargets.size(); i < size; i++) {
-                EntityLivingBase entity = renderTargets.get(i);
-                if (!isRenderable(entity)) continue;
-                double distSq = viewEntity.getDistanceSq(entity);
-                if (distSq > maxDistSq) continue;
-
-                boolean seen = false;
-                if (viewEntity instanceof EntityLivingBase) {
-                    seen = ((EntityLivingBase) viewEntity).canEntityBeSeen(entity);
-                } else {
-                    seen = mc.player.canEntityBeSeen(entity);
-                }
-                if (lineOfSightOnly.getValue() && !seen) continue;
-
-                renderEntityInfo(entity, partial, (float) Math.sqrt(distSq));
+        for (int i = 0, size = renderTargets.size(); i < size; i++) {
+            EntityLivingBase entity = renderTargets.get(i);
+            if (!isRenderable(entity)) continue;
+            double distSq = viewEntity.getDistanceSq(entity);
+            if (distSq > maxDistSq) continue;
+            
+            boolean seen = false;
+            if (viewEntity instanceof EntityLivingBase) {
+                seen = ((EntityLivingBase) viewEntity).canEntityBeSeen(entity);
+            } else {
+                seen = mc.player.canEntityBeSeen(entity);
             }
-        } finally {
-            GlStateManager.depthMask(true);
-            GlStateManager.enableDepth();
-            GlStateManager.enableTexture2D();
-            GlStateManager.enableLighting();
-            GlStateManager.disableBlend();
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager.popMatrix();
-            GL11.glPopAttrib();
+            if (lineOfSightOnly.getValue() && !seen) continue;
+            
+            renderEntityInfo(entity, partial, (float) Math.sqrt(distSq));
         }
+
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepth();
+        GlStateManager.enableLighting();
+        GlStateManager.disableBlend();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.popMatrix();
     }
 
     private void collectTargets() {

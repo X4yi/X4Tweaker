@@ -21,6 +21,7 @@ public final class RenderUtils {
         Tessellator tess = Tessellator.getInstance();
         BufferBuilder buf = tess.getBuffer();
 
+        GlStateManager.pushMatrix();
         GlStateManager.enableBlend();
         GlStateManager.disableTexture2D();
         GlStateManager.tryBlendFuncSeparate(
@@ -30,14 +31,15 @@ public final class RenderUtils {
         GlStateManager.color(red, green, blue, alpha);
 
         buf.begin(7, DefaultVertexFormats.POSITION);
-        buf.pos(x, h, 0.0).endVertex();
-        buf.pos(w, h, 0.0).endVertex();
-        buf.pos(w, y, 0.0).endVertex();
         buf.pos(x, y, 0.0).endVertex();
+        buf.pos(w, y, 0.0).endVertex();
+        buf.pos(w, h, 0.0).endVertex();
+        buf.pos(x, h, 0.0).endVertex();
         tess.draw();
 
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
     }
 
     public static void drawGradientRect(float x, float y, float w, float h, int color1, int color2) {
@@ -132,6 +134,10 @@ public final class RenderUtils {
     }
 
 
+    /**
+     * Rounded rect with batched GL state — sets up GL once, draws all geometry, restores once.
+     * Avoids the 12+ redundant GL state toggles from calling drawRect/drawArcFill internally.
+     */
     public static void drawRoundedRect(float x, float y, float w, float h, float radius, int color) {
         float[] c = unpackColor(color);
         GlStateManager.pushMatrix();
@@ -147,7 +153,7 @@ public final class RenderUtils {
         Tessellator tess = Tessellator.getInstance();
         BufferBuilder buf = tess.getBuffer();
 
-
+        // Center rect
         buf.begin(7, DefaultVertexFormats.POSITION);
         buf.pos(x + radius, h, 0.0).endVertex();
         buf.pos(w - radius, h, 0.0).endVertex();
@@ -155,7 +161,7 @@ public final class RenderUtils {
         buf.pos(x + radius, y, 0.0).endVertex();
         tess.draw();
 
-
+        // Left side rect
         buf.begin(7, DefaultVertexFormats.POSITION);
         buf.pos(x, h - radius, 0.0).endVertex();
         buf.pos(x + radius, h - radius, 0.0).endVertex();
@@ -163,7 +169,7 @@ public final class RenderUtils {
         buf.pos(x, y + radius, 0.0).endVertex();
         tess.draw();
 
-
+        // Right side rect
         buf.begin(7, DefaultVertexFormats.POSITION);
         buf.pos(w - radius, h - radius, 0.0).endVertex();
         buf.pos(w, h - radius, 0.0).endVertex();
@@ -171,7 +177,7 @@ public final class RenderUtils {
         buf.pos(w - radius, y + radius, 0.0).endVertex();
         tess.draw();
 
-
+        // Corner arcs (reusing existing GL state)
         int segments = 8;
         drawArcFillRaw(buf, tess, x + radius, y + radius, radius, 180, 270, segments);
         drawArcFillRaw(buf, tess, w - radius, y + radius, radius, 270, 360, segments);
@@ -184,7 +190,9 @@ public final class RenderUtils {
         GlStateManager.popMatrix();
     }
 
-
+    /**
+     * Arc fill without GL state management — caller is responsible for GL setup/teardown.
+     */
     private static void drawArcFillRaw(BufferBuilder buf, Tessellator tess,
                                         float cx, float cy, float radius,
                                         int startAngle, int endAngle, int segments) {

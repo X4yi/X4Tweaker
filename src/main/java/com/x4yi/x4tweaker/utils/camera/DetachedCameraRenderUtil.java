@@ -29,7 +29,7 @@ public final class DetachedCameraRenderUtil {
 
             GlStateManager.enableBlend();
             GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-
+            
             GlStateManager.enableCull();
             GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 

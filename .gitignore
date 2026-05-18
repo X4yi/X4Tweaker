@@ -21,11 +21,11 @@ build
 eclipse
 run
 r.md
+p.md
 remove_comments.py
 changelog.txt
 gradle
 .vscode
-remove_comments.py
 docs/changelogs
 .github
 scripts

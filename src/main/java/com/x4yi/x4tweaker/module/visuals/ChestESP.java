@@ -29,7 +29,10 @@ public class ChestESP extends ESPBase {
         return cachedEntities;
     }
 
-
+    /**
+     * Unified render: entity ESPs + TileEntity chests in a single GL state block.
+     * This avoids the double pushRenderState/popRenderState that the original had.
+     */
     @Override
     public void onRender3D() {
         if (mc.player == null || mc.world == null) return;
@@ -43,7 +46,7 @@ public class ChestESP extends ESPBase {
             updateTracerStart(mc.getRenderPartialTicks());
         }
 
-
+        // Check if there's anything to render at all
         List<Entity> entities = getEntities();
         List<TileEntity> tileEntities = mc.world.loadedTileEntityList;
         boolean hasEntities = !entities.isEmpty();
@@ -52,14 +55,14 @@ public class ChestESP extends ESPBase {
 
         pushRenderState();
 
-
+        // Render minecart chests (entity-based)
         for (int i = 0, size = entities.size(); i < size; i++) {
             Entity entity = entities.get(i);
             if (entity == mc.player) continue;
             renderEntity(entity, cachedColor, drawLines, drawBoxes);
         }
 
-
+        // Render tile entity chests in the same GL state block
         for (int i = 0, size = tileEntities.size(); i < size; i++) {
             TileEntity te = tileEntities.get(i);
             if (!(te instanceof TileEntityChest)) continue;

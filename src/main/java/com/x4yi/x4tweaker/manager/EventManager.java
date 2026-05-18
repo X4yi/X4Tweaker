@@ -3,7 +3,7 @@ package com.x4yi.x4tweaker.manager;
 import com.x4yi.x4tweaker.event.*;
 import com.x4yi.x4tweaker.core.PacketHandler;
 import com.x4yi.x4tweaker.core.X4TweakerClient;
-import com.x4yi.x4tweaker.gui.ClickGUI;
+import com.x4yi.x4tweaker.gui.v2.clickgui.ClickGUI;
 import io.netty.channel.Channel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;

@@ -17,11 +17,14 @@ import java.util.List;
 import java.util.Locale;
 
 public class ActiveTweaks extends Module {
-    private final ModeSetting position = new ModeSetting("HUD Position", "Posición del HUD en pantalla", "Top Left", "Top Left", "Top Right", "Bottom Left", "Bottom Right");
+    private final ModeSetting position = new ModeSetting("HUD Position", "Posicion del HUD en pantalla", "Top Left", "Top Left", "Top Right", "Bottom Left", "Bottom Right");
     private final BooleanSetting showLogo = new BooleanSetting("Show Title", "Mostrar nombre X4Tweaker en el HUD", true);
 
+    private final List<Module> activeModulesBuffer = new ArrayList<>();
+    private final List<BotStatusEntry> activeBotsBuffer = new ArrayList<>();
+
     public ActiveTweaks() {
-        super("ActiveTweaks", "Muestra los módulos activos en pantalla", Category.UTILITY);
+        super("ActiveTweaks", "Muestra los modulos activos en pantalla", Category.UTILITY);
         addSetting(position);
         addSetting(showLogo);
         setDefaultEnabled(true);
@@ -34,20 +37,20 @@ public class ActiveTweaks extends Module {
         ScaledResolution sr = new ScaledResolution(mc);
         ThemeManager theme = X4TweakerClient.getInstance().getThemeManager();
 
-        List<Module> activeModules = new ArrayList<>();
-        List<BotStatusEntry> activeBots = new ArrayList<>();
+        activeModulesBuffer.clear();
+        activeBotsBuffer.clear();
 
         List<Module> allModules = X4TweakerClient.getInstance().getModuleManager().getModules();
         for (int i = 0, size = allModules.size(); i < size; i++) {
             Module m = allModules.get(i);
             if (!m.isEnabled() || !m.isVisible() || m == this) continue;
-            activeModules.add(m);
+            activeModulesBuffer.add(m);
             if (m instanceof BotModule) {
-                activeBots.add(new BotStatusEntry(m, (BotModule) m));
+                activeBotsBuffer.add(new BotStatusEntry(m, (BotModule) m));
             }
         }
 
-        activeModules.sort(Comparator.comparingInt(m -> -mc.fontRenderer.getStringWidth(getDisplayName(m))));
+        activeModulesBuffer.sort(Comparator.comparingInt(m -> -mc.fontRenderer.getStringWidth(getDisplayName(m))));
 
         String pos = position.getValue();
         boolean isRight  = pos.contains("Right");
@@ -64,8 +67,8 @@ public class ActiveTweaks extends Module {
         }
 
         int activeColor = theme.getColorToggleEncendido().getRGB();
-        for (int i = 0, size = activeModules.size(); i < size; i++) {
-            Module m = activeModules.get(i);
+        for (int i = 0, size = activeModulesBuffer.size(); i < size; i++) {
+            Module m = activeModulesBuffer.get(i);
             String name = getDisplayName(m);
             int width = mc.fontRenderer.getStringWidth(name);
             int x = isRight ? sr.getScaledWidth() - width - 2 : 2;
@@ -74,8 +77,8 @@ public class ActiveTweaks extends Module {
             yOffset = isBottom ? yOffset - 10 : yOffset + 10;
         }
 
-        for (int i = 0, size = activeBots.size(); i < size; i++) {
-            BotStatusEntry entry = activeBots.get(i);
+        for (int i = 0, size = activeBotsBuffer.size(); i < size; i++) {
+            BotStatusEntry entry = activeBotsBuffer.get(i);
             String line = getDisplayName(entry.module) + " [" + entry.botModule.getBotStatus() + "]";
             int width = mc.fontRenderer.getStringWidth(line);
             int x = isRight ? sr.getScaledWidth() - width - 2 : 2;

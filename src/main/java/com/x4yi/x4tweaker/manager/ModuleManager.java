@@ -5,7 +5,7 @@ import com.x4yi.x4tweaker.module.Module;
 import com.x4yi.x4tweaker.module.bots.BetterAFK;
 import com.x4yi.x4tweaker.module.client.ClickGUIModule;
 import com.x4yi.x4tweaker.module.combat.KillAuraLegit;
-import com.x4yi.x4tweaker.module.random_tweaks.FastCrafting;
+import com.x4yi.x4tweaker.module.tweaks.FastCrafting;
 import com.x4yi.x4tweaker.module.tweaks.AutoSprint;
 import com.x4yi.x4tweaker.module.visuals.*;
 import com.x4yi.x4tweaker.module.utility.Freecam;

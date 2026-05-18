@@ -94,7 +94,11 @@ public abstract class Module {
         if (enabled != value) toggle();
     }
 
-
+    /**
+     * Sets the initial enabled state without triggering lifecycle hooks (onEnable/onDisable).
+     * Use this in constructors to declare default enabled state.
+     * ConfigManager.load() will override this if a saved config exists.
+     */
     protected void setDefaultEnabled(boolean value) {
         this.enabled = value;
     }

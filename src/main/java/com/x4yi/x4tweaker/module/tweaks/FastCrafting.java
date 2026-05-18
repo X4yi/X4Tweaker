@@ -1,4 +1,4 @@
-package com.x4yi.x4tweaker.module.random_tweaks;
+package com.x4yi.x4tweaker.module.tweaks;
 
 import com.x4yi.x4tweaker.module.Category;
 import com.x4yi.x4tweaker.module.Module;
@@ -32,7 +32,7 @@ public class FastCrafting extends Module {
     public void onUpdate() {
         if (mc.player == null || !(mc.currentScreen instanceof GuiCrafting) || !(mc.player.openContainer instanceof ContainerWorkbench)) {
             triggerPressed = false;
-
+            // Invalidate stale recipe when leaving crafting GUI
             if (hasRecipe()) {
                 clearRecipe();
             }

@@ -1,4 +1,4 @@
-# Estado Actual (r1.0.1)
+# Estado Actual (r1.0.3)
 
 ## Resumen rápido
 
@@ -8,6 +8,21 @@
 - Automatización/bot: `framework funcional` con AFKBotTask y BotMovementController.
 - Pipeline de paquetes: `activo` (PacketEvent.Send/Receive vía Netty).
 - Localización: `en_us.lang` y `es_es.lang` completos.
+
+## Cambios en r1.0.3
+
+- Versión unificada a `r1.0.3` en todos los archivos.
+- Eliminado `HUDOverlay` (duplicado de `ActiveTweaks`).
+- Eliminado `CustomFontRenderer` (dead code con aloca de GPU sin uso).
+- UUID protegido en `TargetSelector` ahora es configurable vía builder (eliminado hardcode).
+- Corregido bug de coordenadas en `RenderUtils.drawRect` + agregado `pushMatrix/popMatrix`.
+- `InputController` ahora bloquea input real del jugador vía `InputUpdateEvent`.
+- `Freecam` y `CameraDetach` refactorizados para compartir `DetachedCameraModule` (eliminada duplicación de ~200 LOC).
+- Eliminadas allocations por frame en `ActiveTweaks` (buffers reutilizables).
+- `EnvironmentScanner.isSolid` ahora usa `getCollisionBoundingBox` para detectar partial blocks.
+- Agregadas traducciones de settings de Freecam y CameraDetach.
+- `FastCrafting` movido de `random_tweaks` a `tweaks`.
+- Calls redundantes de `RaytraceUtil.updateMouseOver` reducidas a una por fase de tick.
 
 ## Implementado
 
@@ -51,7 +66,7 @@
 - Botón `[X4]` inyectado en `GuiInventory`.
 - Hotfix de render aplicado para `Freecam`/`CameraDetach`: render local estable en cámara desacoplada y sin transparencia accidental.
 
-### Módulos (13 totales)
+### Módulos (14 totales)
 
 - `Fullbright`: implementado.
 - `PlayerESP`: implementado.
@@ -80,8 +95,8 @@
 
 ## Parcial / con deuda técnica
 
-- `InputController`: marca `inputLocked` pero ningún sistema externo lo consume para bloquear input real del jugador.
 - `AttackOrchestrator`: factory class que solo provee `createLegit()`, sin otras implementaciones.
+- `Freecam` / `CameraDetach`: refactorizados para compartir `DetachedCameraModule`, pero aún tienen event handlers duplicados que podrían consolidarse más.
 
 ## No implementado todavía
 

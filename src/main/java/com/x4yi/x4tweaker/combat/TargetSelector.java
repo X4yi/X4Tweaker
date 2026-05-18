@@ -41,6 +41,7 @@ public class TargetSelector {
     private final boolean ignoreSleepingFlag;
     private final boolean ignoreEndermanFlag;
     private final Set<String> customIgnoreList;
+    private final Set<UUID> protectedUuids;
 
     private TargetSelector(Builder builder) {
         this.maxRange = builder.maxRange;
@@ -56,6 +57,7 @@ public class TargetSelector {
         this.ignoreSleepingFlag = builder.ignoreSleepingFlag;
         this.ignoreEndermanFlag = builder.ignoreEndermanFlag;
         this.customIgnoreList = builder.customIgnoreList;
+        this.protectedUuids = builder.protectedUuids;
     }
 
 
@@ -104,13 +106,12 @@ public class TargetSelector {
 
         return bestTarget;
     }
-    //! X4yi
-    private static final UUID PROTECTED_UUID = UUID.fromString("0a97111b-d215-4278-bfa0-e932203b4c3b");
 
     private boolean passesFilters(EntityLivingBase entity) {
         if (entity instanceof EntityPlayer) {
             EntityPlayer ep = (EntityPlayer) entity;
-            if (PROTECTED_UUID.equals(ep.getGameProfile().getId())) return false;
+            UUID playerId = ep.getGameProfile().getId();
+            if (playerId != null && protectedUuids != null && protectedUuids.contains(playerId)) return false;
         }
         if (ignorePlayersFlag && entity instanceof EntityPlayer) return false;
         if (ignoreVillagersFlag && entity instanceof EntityVillager) return false;
@@ -152,6 +153,7 @@ public class TargetSelector {
         private boolean ignoreSleepingFlag = true;
         private boolean ignoreEndermanFlag = false;
         private Set<String> customIgnoreList = null;
+        private Set<UUID> protectedUuids = new java.util.HashSet<>();
 
         public Builder maxRange(double range) { this.maxRange = range; return this; }
         public Builder maxAngle(double angle) { this.maxAngle = angle; return this; }
@@ -166,6 +168,7 @@ public class TargetSelector {
         public Builder ignoreSleeping(boolean ignore) { this.ignoreSleepingFlag = ignore; return this; }
         public Builder ignoreEnderman(boolean ignore) { this.ignoreEndermanFlag = ignore; return this; }
         public Builder customIgnoreList(Set<String> list) { this.customIgnoreList = list; return this; }
+        public Builder protectedUuids(Set<UUID> uuids) { this.protectedUuids = uuids; return this; }
 
         public TargetSelector build() {
             return new TargetSelector(this);

@@ -197,13 +197,15 @@ public class EnvironmentScanner {
         return maxDist;
     }
 
-
     private boolean isSolid(BlockPos pos) {
         if (mc.world == null) return false;
         IBlockState state = mc.world.getBlockState(pos);
-        return state.getMaterial() != Material.AIR
-            && state.getMaterial() != Material.WATER
-            && state.getMaterial() != Material.PLANTS
-            && state.isFullBlock();
+        if (state.getMaterial() == Material.AIR
+            || state.getMaterial() == Material.WATER
+            || state.getMaterial() == Material.PLANTS) {
+            return false;
+        }
+        net.minecraft.util.math.AxisAlignedBB collision = state.getCollisionBoundingBox(mc.world, pos);
+        return collision != null && collision.maxY - collision.minY > 0.5;
     }
 }

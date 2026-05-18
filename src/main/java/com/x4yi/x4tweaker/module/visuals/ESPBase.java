@@ -17,12 +17,16 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+/**
+ * Reusable render state — pre-allocated to avoid GC pressure in render loops.
+ * Subclasses must populate {@link #fillColor(float[])} instead of returning new arrays.
+ */
 
 public abstract class ESPBase extends Module {
     protected final ModeSetting style = new ModeSetting("Style", "Estilo de renderizado ESP", "Lines&Boxes", "Lines&Boxes", "Boxes", "Lines");
     private final BooleanSetting renderRealEntity = new BooleanSetting("X-Ray Entity", "Ver entidad real a través de paredes", false);
 
-
+    // Pre-allocated render state to avoid allocations in hot loop
     protected final float[] cachedColor = new float[4];
     private double tracerStartX, tracerStartY, tracerStartZ;
 
@@ -34,7 +38,10 @@ public abstract class ESPBase extends Module {
 
     protected abstract List<Entity> getEntities();
 
-
+    /**
+     * Fill the pre-allocated color array with RGBA values.
+     * Subclasses override this instead of returning new arrays.
+     */
     protected abstract void fillColor(float[] out);
 
     @Override
@@ -151,23 +158,23 @@ public abstract class ESPBase extends Module {
         java.nio.FloatBuffer modelView = org.lwjgl.BufferUtils.createFloatBuffer(16);
         org.lwjgl.opengl.GL11.glGetFloat(org.lwjgl.opengl.GL11.GL_MODELVIEW_MATRIX, modelView);
 
-
+        // Extract matrices: Column-major format
         float m00 = modelView.get(0), m01 = modelView.get(1), m02 = modelView.get(2);
         float m10 = modelView.get(4), m11 = modelView.get(5), m12 = modelView.get(6);
         float m20 = modelView.get(8), m21 = modelView.get(9), m22 = modelView.get(10);
         float m30 = modelView.get(12), m31 = modelView.get(13), m32 = modelView.get(14);
 
-
+        // Calculate inverse translation (true camera origin in relative world space)
         float invTx = -(m00 * m30 + m01 * m31 + m02 * m32);
         float invTy = -(m10 * m30 + m11 * m31 + m12 * m32);
         float invTz = -(m20 * m30 + m21 * m31 + m22 * m32);
 
-
+        // Forward vector is the 3rd row of the rotation matrix (negated)
         float fwdX = -m02;
         float fwdY = -m12;
         float fwdZ = -m22;
 
-
+        // Start line slightly in front of the camera to align with crosshair
         tracerStartX = invTx + fwdX;
         tracerStartY = invTy + fwdY;
         tracerStartZ = invTz + fwdZ;
