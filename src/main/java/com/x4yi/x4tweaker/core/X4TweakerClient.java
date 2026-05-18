@@ -3,6 +3,7 @@ package com.x4yi.x4tweaker.core;
 import com.x4yi.x4tweaker.X4Tweaker;
 import com.x4yi.x4tweaker.automation.AutomationManager;
 import com.x4yi.x4tweaker.manager.*;
+import com.x4yi.x4tweaker.utils.I18nUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,6 +52,7 @@ public class X4TweakerClient {
     }
 
     public void init() {
+        I18nUtils.applyLanguageFallback();
         LOGGER.info("Post-inicialización completada.");
     }
 

@@ -20,7 +20,7 @@ x4tweaker.module.autosprint.name=Auto Sprint
 x4tweaker.module.autosprint.desc=Automatically sprints while moving forward
 
 x4tweaker.module.killauralegit.name=KillAura Legit
-x4tweaker.module.killauralegit.desc=Attacks nearby entities with smooth rotations
+x4tweaker.module.killauralegit.desc=Attacks nearby entities with humanized rotations
 
 x4tweaker.module.fastcrafting.name=Fast Crafting
 x4tweaker.module.fastcrafting.desc=Instantly refills and crafts using detected recipe
@@ -29,13 +29,16 @@ x4tweaker.module.clickgui.name=Click GUI
 x4tweaker.module.clickgui.desc=Opens the settings interface
 
 x4tweaker.module.betterafk.name=Better AFK
-x4tweaker.module.betterafk.desc=Smart AFK bot: auto-eats and fights back when hit
+x4tweaker.module.betterafk.desc=AFK but better.
+
 x4tweaker.module.mobinfo.name=Mob Info
-x4tweaker.module.mobinfo.desc=Floating world-space entity info labels
+x4tweaker.module.mobinfo.desc=Floating entity info.
+
 x4tweaker.module.freecam.name=Freecam
-x4tweaker.module.freecam.desc=Free spectator-style camera
+x4tweaker.module.freecam.desc=Free camera.
+
 x4tweaker.module.cameradetach.name=Camera Detach
-x4tweaker.module.cameradetach.desc=Detached camera while keeping player control
+x4tweaker.module.cameradetach.desc=Detached camera.
 
 x4tweaker.setting.mobesp.max_distance.name=Max Distance
 x4tweaker.setting.mobesp.max_distance.desc=Maximum distance to render mob ESP

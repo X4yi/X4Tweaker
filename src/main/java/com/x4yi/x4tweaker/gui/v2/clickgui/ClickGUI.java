@@ -41,6 +41,9 @@ public class ClickGUI extends GuiScreen {
     private int btnBottomThemeX1, btnBottomThemeY1, btnBottomThemeX2, btnBottomThemeY2;
     private int btnBottomUpdateX1, btnBottomUpdateY1, btnBottomUpdateX2, btnBottomUpdateY2;
 
+    private int lastMouseX = -1;
+    private int lastMouseY = -1;
+
     @Override
     public boolean doesGuiPauseGame() {
         return themeBridge.isEnablePause() && mc.isSingleplayer();
@@ -129,6 +132,11 @@ public class ClickGUI extends GuiScreen {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        int dx = mouseX - lastMouseX;
+        int dy = mouseY - lastMouseY;
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
+
         DrawHelper.drawBorderedRect(windowX - 1, windowY - 1, windowX + windowW + 1, windowY + windowH + 1, 1.5f, themeBridge.getBorderColor(), themeBridge.getBgColor());
         DrawHelper.drawRect(windowX, windowY, windowX + windowW, windowY + windowH, themeBridge.getBgColor());
         DrawHelper.drawGradientRectH(windowX, windowY, windowX + windowW, windowY + HEADER_H, themeBridge.getAccentDarkColor(), themeBridge.getAccentColor());
@@ -160,6 +168,7 @@ public class ClickGUI extends GuiScreen {
         if (sidebar.getSelected() == Category.KEYBINDS) {
             keybindsContentPanel.render(mouseX, mouseY, partialTicks);
         } else {
+            contentPanel.onMouseMove(mouseX, mouseY, dx, dy);
             contentPanel.render(mouseX, mouseY, partialTicks);
         }
 
@@ -186,8 +195,9 @@ public class ClickGUI extends GuiScreen {
 
         if (mc.isSingleplayer()) {
             boolean pauseHover = mouseX >= btnPauseX1 && mouseX <= btnPauseX2 && mouseY >= btnPauseY1 && mouseY <= btnPauseY2;
-            DrawHelper.drawRect(btnPauseX1, btnPauseY1, btnPauseX2, btnPauseY2, pauseHover ? 0x44FFFFFF : 0x22FFFFFF);
             boolean paused = themeBridge.isEnablePause();
+            int pauseBg = paused ? (pauseHover ? 0x6655FF55 : 0x4455FF55) : (pauseHover ? 0x66FFFFFF : 0x22FFFFFF);
+            DrawHelper.drawRect(btnPauseX1, btnPauseY1, btnPauseX2, btnPauseY2, pauseBg);
             mc.fontRenderer.drawStringWithShadow(paused ? "\u25B6" : "\u23F8", btnPauseX1 + 14, btnPauseY1 + 2, paused ? 0xFF55FF55 : 0xFFFF5555);
             mc.fontRenderer.drawStringWithShadow("Pause", btnPauseX1 + 4, btnPauseY1 + 2, 0xFFAAAAAA);
         }
@@ -279,6 +289,18 @@ public class ClickGUI extends GuiScreen {
             keybindsContentPanel.handleMouseWheel(wheel);
         } else {
             contentPanel.handleMouseWheel(wheel);
+        }
+    }
+
+    public void mouseMoved(int mouseX, int mouseY) {
+        int dx = mouseX - lastMouseX;
+        int dy = mouseY - lastMouseY;
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
+        if (sidebar.getSelected() == Category.KEYBINDS) {
+            keybindsContentPanel.onMouseMove(mouseX, mouseY, dx, dy);
+        } else {
+            contentPanel.onMouseMove(mouseX, mouseY, dx, dy);
         }
     }
 

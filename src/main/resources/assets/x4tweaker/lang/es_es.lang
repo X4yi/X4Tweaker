@@ -2,25 +2,25 @@
 
 # === MÓDULOS ===
 
-x4tweaker.module.fullbright.name=Brillo Máximo
+x4tweaker.module.fullbright.name=Brillo Maximo
 x4tweaker.module.fullbright.desc=Maximiza el brillo del juego
 
-x4tweaker.module.chestesp.name=ESP de Cofres
-x4tweaker.module.chestesp.desc=Resalta cofres a través de paredes
+x4tweaker.module.chestesp.name=Cofres ESP
+x4tweaker.module.chestesp.desc=Resalta cofres a traves de paredes
 
-x4tweaker.module.playeresp.name=ESP de Jugadores
-x4tweaker.module.playeresp.desc=Resalta jugadores a través de paredes
-x4tweaker.module.mobesp.name=ESP de Mobs
+x4tweaker.module.playeresp.name=Jugadores ESP
+x4tweaker.module.playeresp.desc=Resalta jugadores a traves de paredes
+x4tweaker.module.mobesp.name=Mobs ESP
 x4tweaker.module.mobesp.desc=Resalta mobs/entidades cercanas con filtros
 
 x4tweaker.module.activetweaks.name=Tweaks Activos
-x4tweaker.module.activetweaks.desc=Muestra los módulos activos en pantalla
+x4tweaker.module.activetweaks.desc=Muestra los modulos activos en pantalla
 
 x4tweaker.module.autosprint.name=Auto Sprint
-x4tweaker.module.autosprint.desc=Corre automáticamente al avanzar
+x4tweaker.module.autosprint.desc=Corre automaticamente al avanzar
 
 x4tweaker.module.killauralegit.name=KillAura Legit
-x4tweaker.module.killauralegit.desc=Ataca entidades cercanas con rotaciones suaves
+x4tweaker.module.killauralegit.desc=Ataca entidades cercanas con rotaciones humanizadas
 
 x4tweaker.module.fastcrafting.name=Crafteo Rápido
 x4tweaker.module.fastcrafting.desc=Rellena y craftea instantáneamente con la receta detectada
@@ -29,13 +29,16 @@ x4tweaker.module.clickgui.name=Click GUI
 x4tweaker.module.clickgui.desc=Abre la interfaz de configuración
 
 x4tweaker.module.betterafk.name=Better AFK
-x4tweaker.module.betterafk.desc=Bot AFK inteligente: come solo y contraataca al recibir golpes
+x4tweaker.module.betterafk.desc=AFK pero mejor
+
 x4tweaker.module.mobinfo.name=Info de Mobs
 x4tweaker.module.mobinfo.desc=Etiquetas flotantes de entidades en el mundo
+
 x4tweaker.module.freecam.name=Freecam
-x4tweaker.module.freecam.desc=Cámara libre estilo espectador
+x4tweaker.module.freecam.desc=Cámara libre.
+
 x4tweaker.module.cameradetach.name=Cámara Desacoplada
-x4tweaker.module.cameradetach.desc=Desacopla la cámara manteniendo control del jugador
+x4tweaker.module.cameradetach.desc=Cámara desacoplada.
 
 x4tweaker.setting.mobesp.max_distance.name=Distancia Máxima
 x4tweaker.setting.mobesp.max_distance.desc=Distancia máxima para renderizar el ESP de mobs
@@ -57,8 +60,8 @@ x4tweaker.setting.mobesp.ignore_armor_stands.name=Ignorar Armor Stands
 x4tweaker.setting.mobesp.ignore_armor_stands.desc=Oculta armor stands del ESP
 x4tweaker.setting.mobesp.ignore_players.name=Ignorar Jugadores
 x4tweaker.setting.mobesp.ignore_players.desc=Oculta jugadores del ESP
-x4tweaker.setting.mobesp.ignore_list.name=Lista de Ignorar
-x4tweaker.setting.mobesp.ignore_list.desc=Nombres o IDs de entidad a ignorar
+x4tweaker.setting.mobesp.ignore_list.name=Lista para Ignorar
+x4tweaker.setting.mobesp.ignore_list.desc=Nombres o IDs de entidades a ignorar
 
 # === SETTINGS: ActiveTweaks ===
 
@@ -83,29 +86,29 @@ x4tweaker.setting.playeresp.x_ray_entity.desc=Ver la entidad real a través de p
 
 x4tweaker.setting.killauralegit.attack_range.name=Rango de Ataque
 x4tweaker.setting.killauralegit.attack_range.desc=Distancia máxima para atacar
-x4tweaker.setting.killauralegit.rotation_speed.name=Velocidad de Giro
-x4tweaker.setting.killauralegit.rotation_speed.desc=Velocidad de giro de cámara (mayor = más lento)
+x4tweaker.setting.killauralegit.rotation_speed.name=Velocidad de Rotación
+x4tweaker.setting.killauralegit.rotation_speed.desc=Velocidad de rotación de cámara (mayor = más lento)
 x4tweaker.setting.killauralegit.target_priority.name=Prioridad de Objetivo
 x4tweaker.setting.killauralegit.target_priority.desc=Cómo elegir el objetivo
-x4tweaker.setting.killauralegit.aim_precision.name=Precisión de Puntería
+x4tweaker.setting.killauralegit.aim_precision.name=Precisión de Apuntado
 x4tweaker.setting.killauralegit.aim_precision.desc=Precisión de ángulo requerida para atacar (grados)
 x4tweaker.setting.killauralegit.fov_filter.name=Filtro de FOV
 x4tweaker.setting.killauralegit.fov_filter.desc=Campo de visión para buscar objetivos
-x4tweaker.setting.killauralegit.skip_players.name=Saltar Jugadores
+x4tweaker.setting.killauralegit.skip_players.name=Ignorar Jugadores
 x4tweaker.setting.killauralegit.skip_players.desc=No atacar jugadores
-x4tweaker.setting.killauralegit.skip_monsters.name=Saltar Monstruos
+x4tweaker.setting.killauralegit.skip_monsters.name=Ignorar Monstruos
 x4tweaker.setting.killauralegit.skip_monsters.desc=No atacar mobs hostiles
-x4tweaker.setting.killauralegit.skip_animals.name=Saltar Animales
+x4tweaker.setting.killauralegit.skip_animals.name=Ignorar Animales
 x4tweaker.setting.killauralegit.skip_animals.desc=No atacar animales pacíficos
-x4tweaker.setting.killauralegit.skip_slimes.name=Saltar Slimes
+x4tweaker.setting.killauralegit.skip_slimes.name=Ignorar Slimes
 x4tweaker.setting.killauralegit.skip_slimes.desc=No atacar slimes
-x4tweaker.setting.killauralegit.skip_pets.name=Saltar Mascotas
+x4tweaker.setting.killauralegit.skip_pets.name=Ignorar Mascotas
 x4tweaker.setting.killauralegit.skip_pets.desc=No atacar mascotas domesticadas
-x4tweaker.setting.killauralegit.skip_flying.name=Saltar Voladores
+x4tweaker.setting.killauralegit.skip_flying.name=Ignorar Voladores
 x4tweaker.setting.killauralegit.skip_flying.desc=No atacar entidades voladoras
-x4tweaker.setting.killauralegit.skip_sleeping.name=Saltar Durmiendo
+x4tweaker.setting.killauralegit.skip_sleeping.name=Ignorar Durmiendo
 x4tweaker.setting.killauralegit.skip_sleeping.desc=No atacar jugadores durmiendo
-x4tweaker.setting.killauralegit.skip_enderman.name=Saltar Enderman
+x4tweaker.setting.killauralegit.skip_enderman.name=Ignorar Enderman
 x4tweaker.setting.killauralegit.skip_enderman.desc=No atacar endermen
 x4tweaker.setting.killauralegit.ignore_list.name=Lista de Ignorar
 x4tweaker.setting.killauralegit.ignore_list.desc=Nombres de entidades a ignorar
@@ -113,40 +116,40 @@ x4tweaker.setting.killauralegit.ignore_list.desc=Nombres de entidades a ignorar
 # === CLICKGUI: Editor de Tema ===
 
 x4tweaker.clickgui.theme.select.title=Selecciona un color
-x4tweaker.clickgui.theme.select.hint=Haz clic en una entrada para editarla.
+x4tweaker.clickgui.theme.select.hint=Haz clic en una opción para editarla.
 x4tweaker.clickgui.theme.edit.title=Editando
-x4tweaker.clickgui.theme.edit.hint=Arrastra en las barras para ajustar tono, saturación, brillo y alpha.
-x4tweaker.clickgui.theme.action.reset_all=Restablecer todo
-x4tweaker.clickgui.theme.action.reset_slot=Restablecer color
-x4tweaker.clickgui.theme.action.save_back=Guardar y volver
+x4tweaker.clickgui.theme.edit.hint=Arrastra las barras para ajustar tono, saturación, brillo y alpha.
+x4tweaker.clickgui.theme.action.reset_all=Restablecer Todo
+x4tweaker.clickgui.theme.action.reset_slot=Restablecer Color
+x4tweaker.clickgui.theme.action.save_back=Guardar y Salir
 
 # === SETTINGS: BetterAFK ===
 
 x4tweaker.setting.betterafk.check_interval.name=Intervalo de Chequeo
 x4tweaker.setting.betterafk.check_interval.desc=Ticks entre cada chequeo del bot
-x4tweaker.setting.betterafk.auto_eat.name=Comer Automático
+x4tweaker.setting.betterafk.auto_eat.name=Auto-Comer
 x4tweaker.setting.betterafk.auto_eat.desc=Comer automáticamente cuando hay hambre
 x4tweaker.setting.betterafk.hunger_threshold.name=Umbral de Hambre
 x4tweaker.setting.betterafk.hunger_threshold.desc=Nivel de hambre para empezar a comer
 x4tweaker.setting.betterafk.eat_until.name=Comer Hasta
 x4tweaker.setting.betterafk.eat_until.desc=Nivel de hambre objetivo al comer
-x4tweaker.setting.betterafk.auto_defend.name=Auto Defensa
+x4tweaker.setting.betterafk.auto_defend.name=Auto-Defensa
 x4tweaker.setting.betterafk.auto_defend.desc=Contraatacar automáticamente al recibir golpes
 x4tweaker.setting.betterafk.attack_range.name=Rango de Ataque
 x4tweaker.setting.betterafk.attack_range.desc=Distancia máxima para atacar al agresor
-x4tweaker.setting.betterafk.rotation_speed.name=Velocidad de Giro
-x4tweaker.setting.betterafk.rotation_speed.desc=Velocidad de giro de cámara (mayor = más lento)
+x4tweaker.setting.betterafk.rotation_speed.name=Velocidad de Rotación
+x4tweaker.setting.betterafk.rotation_speed.desc=Velocidad de rotación de cámara (mayor = más lento)
 x4tweaker.setting.betterafk.sprint_while_chasing.name=Sprint al Perseguir
 x4tweaker.setting.betterafk.sprint_while_chasing.desc=Correr al perseguir al agresor
 x4tweaker.setting.betterafk.jump_while_attacking.name=Saltar al Atacar
 x4tweaker.setting.betterafk.jump_while_attacking.desc=Saltar durante combate para hacer críticos
-x4tweaker.setting.betterafk.strafe_in_combat.name=Esquivar en Combate
-x4tweaker.setting.betterafk.strafe_in_combat.desc=Esquivar lateralmente durante combate
-x4tweaker.setting.betterafk.strafe_interval.name=Intervalo de Esquive
-x4tweaker.setting.betterafk.strafe_interval.desc=Ticks entre cada cambio de dirección de esquive
-x4tweaker.setting.betterafk.max_chase_distance.name=Distancia Máx. Persecución
+x4tweaker.setting.betterafk.strafe_in_combat.name=Movimiento Lateral
+x4tweaker.setting.betterafk.strafe_in_combat.desc=Moverse lateralmente durante combate
+x4tweaker.setting.betterafk.strafe_interval.name=Intervalo de Movimiento
+x4tweaker.setting.betterafk.strafe_interval.desc=Ticks entre cada cambio de dirección
+x4tweaker.setting.betterafk.max_chase_distance.name=Distancia Máx. de Persecución
 x4tweaker.setting.betterafk.max_chase_distance.desc=Distancia máxima de persecución desde el punto AFK
-x4tweaker.setting.betterafk.avoid_mobs_in_path.name=Evitar Mobs en Camino
+x4tweaker.setting.betterafk.avoid_mobs_in_path.name=Evitar Mobs al Paso
 x4tweaker.setting.betterafk.avoid_mobs_in_path.desc=Esquivar otros mobs al perseguir al agresor
 
 # === SETTINGS: Freecam ===
@@ -157,14 +160,14 @@ x4tweaker.setting.freecam.vertical_speed.name=Velocidad Vertical
 x4tweaker.setting.freecam.vertical_speed.desc=Velocidad de movimiento vertical
 x4tweaker.setting.freecam.render_player.name=Renderizar Jugador
 x4tweaker.setting.freecam.render_player.desc=Muestra el modelo real del jugador
-x4tweaker.setting.freecam.freeze_rotations.name=Congelar Rotaciones
-x4tweaker.setting.freecam.freeze_rotations.desc=Congela la rotación de cámara del jugador
+x4tweaker.setting.freecam.freeze_rotations.name=Bloquear Rotación
+x4tweaker.setting.freecam.freeze_rotations.desc=Bloquea la rotación de cámara del jugador
 
 # === SETTINGS: CameraDetach ===
 
 x4tweaker.setting.cameradetach.lock_mode.name=Modo de Bloqueo
 x4tweaker.setting.cameradetach.lock_mode.desc=Comportamiento de bloqueo de cámara
-x4tweaker.setting.cameradetach.smooth_speed.name=Suavidad
-x4tweaker.setting.cameradetach.smooth_speed.desc=Suavidad de cámara
-x4tweaker.setting.cameradetach.pan_speed.name=Velocidad de Paneo
-x4tweaker.setting.cameradetach.pan_speed.desc=Velocidad de paneo manual
+x4tweaker.setting.cameradetach.smooth_speed.name=Suavizado
+x4tweaker.setting.cameradetach.smooth_speed.desc=Suavizado de cámara
+x4tweaker.setting.cameradetach.pan_speed.name=Velocidad de Movimiento
+x4tweaker.setting.cameradetach.pan_speed.desc=Velocidad de movimiento manual

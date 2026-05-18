@@ -13,6 +13,12 @@ import java.awt.Color;
 import java.io.IOException;
 
 public class ThemeEditorGUI extends GuiScreen {
+    private static final int COL1_W = 160;
+    private static final int COL2_W = 210;
+    private static final int GAP = 12;
+    private static final int MARGIN = 6;
+    private static final int HEADER_H = 28;
+
     private final ClickGUI parentScreen;
     private final ThemeBridge theme;
     private ColorSlotList colorPalette;
@@ -23,7 +29,6 @@ public class ThemeEditorGUI extends GuiScreen {
     private String[] presetNames;
 
     private int windowX, windowY, windowW, windowH;
-    private int headerHeight = 28;
     private int btnCloseX1, btnCloseY1, btnCloseX2, btnCloseY2;
     private int btnResetX1, btnResetY1, btnResetX2, btnResetY2;
     private int btnSaveX1, btnSaveY1, btnSaveX2, btnSaveY2;
@@ -31,6 +36,8 @@ public class ThemeEditorGUI extends GuiScreen {
     private boolean presetDropdownOpen = false;
 
     private int previewAreaX, previewAreaY, previewAreaW, previewAreaH;
+    private int contentTop, contentH;
+    private int col2X, rightPanelX, rightPanelW;
 
     public ThemeEditorGUI(ClickGUI parentScreen, ThemeBridge theme) {
         this.parentScreen = parentScreen;
@@ -67,10 +74,12 @@ public class ThemeEditorGUI extends GuiScreen {
         btnPresetX2 = btnPresetX1 + 100;
         btnPresetY2 = btnPresetY1 + 14;
 
-        int paletteW = 160;
-        int pickerW = hsvPickerWidth();
-        int rightPanelW = windowW - paletteW - pickerW - 24;
-        int contentH = windowH - headerHeight - 10;
+        col2X = windowX + COL1_W + GAP;
+        rightPanelX = col2X + COL2_W + GAP;
+        rightPanelW = windowW - COL1_W - COL2_W - GAP * 3 - MARGIN;
+
+        contentTop = windowY + HEADER_H + MARGIN;
+        contentH = windowH - HEADER_H - MARGIN * 2;
 
         colorPalette = new ColorSlotList(theme, new Runnable() {
             @Override
@@ -81,7 +90,7 @@ public class ThemeEditorGUI extends GuiScreen {
                 }
             }
         });
-        colorPalette.setBounds(windowX + 6, windowY + headerHeight + 6, paletteW - 6, contentH - 12);
+        colorPalette.setBounds(windowX + MARGIN, contentTop, COL1_W - MARGIN * 2, contentH);
 
         hsvPicker = new HSVColorPicker(new Runnable() {
             @Override
@@ -92,26 +101,22 @@ public class ThemeEditorGUI extends GuiScreen {
                 }
             }
         });
-        hsvPicker.setBounds(windowX + paletteW + 6, windowY + headerHeight + 30, pickerW, 140);
+        hsvPicker.setBounds(col2X, contentTop, COL2_W, contentH);
 
         previewControls = new PreviewControlPanel(theme);
-        previewControls.setBounds(windowX + paletteW + pickerW + 12, windowY + headerHeight + 6, rightPanelW - 6, 80);
+        previewControls.setBounds(rightPanelX, contentTop, rightPanelW, 80);
 
         guiPreviewRenderer = new GuiPreviewRenderer(theme);
 
-        previewAreaX = windowX + paletteW + pickerW + 12;
-        previewAreaW = rightPanelW - 6;
-    }
-
-    private int hsvPickerWidth() {
-        return 210;
+        previewAreaX = col2X;
+        previewAreaW = windowW - col2X - MARGIN;
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         DrawHelper.drawBorderedRect(windowX - 1, windowY - 1, windowX + windowW + 1, windowY + windowH + 1, 1.5f, theme.getBorderColor(), theme.getBgColor());
         DrawHelper.drawRect(windowX, windowY, windowX + windowW, windowY + windowH, theme.getBgColor());
-        DrawHelper.drawGradientRectH(windowX, windowY, windowX + windowW, windowY + headerHeight, theme.getAccentDarkColor(), theme.getAccentColor());
+        DrawHelper.drawGradientRectH(windowX, windowY, windowX + windowW, windowY + HEADER_H, theme.getAccentDarkColor(), theme.getAccentColor());
 
         GLHelper.enableScissor(windowX, windowY, windowW, windowH);
 
@@ -135,11 +140,13 @@ public class ThemeEditorGUI extends GuiScreen {
 
         if (presetDropdownOpen) {
             int dropY = btnPresetY2;
-            int dropH = presetNames.length * 12;
+            int maxDropH = 80;
+            int dropH = Math.min(presetNames.length * 12, maxDropH);
             DrawHelper.drawRect(btnPresetX1, dropY, btnPresetX2, dropY + dropH, 0xFF222222);
             DrawHelper.drawBorderedRect(btnPresetX1, dropY, btnPresetX2, dropY + dropH, 1.0f, 0xFF555555, 0x00000000);
             for (int i = 0; i < presetNames.length; i++) {
                 int itemY = dropY + i * 12;
+                if (itemY + 12 > dropY + dropH) break;
                 boolean itemHover = mouseX >= btnPresetX1 && mouseX <= btnPresetX2 && mouseY >= itemY && mouseY <= itemY + 12;
                 if (itemHover) DrawHelper.drawRect(btnPresetX1, itemY, btnPresetX2, itemY + 12, 0xFF444444);
                 mc.fontRenderer.drawStringWithShadow(presetNames[i], btnPresetX1 + 4, itemY + 2, i == selectedPreset ? 0xFF66FF66 : 0xFFDDDDDD);
@@ -153,7 +160,11 @@ public class ThemeEditorGUI extends GuiScreen {
             hsvPicker.setVisible(true);
             hsvPicker.render(mouseX, mouseY, partialTicks);
             String slotName = theme.getColorName(idx);
-            mc.fontRenderer.drawStringWithShadow("Editing: " + slotName, hsvPicker.getX(), hsvPicker.getY() - 14, 0xFFCCCCCC);
+            int labelW = mc.fontRenderer.getStringWidth("Editing: " + slotName);
+            int labelX = hsvPicker.getX() + (hsvPicker.getWidth() - labelW) / 2;
+            int labelY = hsvPicker.getY() + hsvPicker.getHeight() - 16;
+            DrawHelper.drawRect(labelX - 4, labelY - 2, labelX + labelW + 4, labelY + 12, 0x99000000);
+            mc.fontRenderer.drawStringWithShadow("Editing: " + slotName, labelX, labelY, 0xFFCCCCCC);
         } else {
             hsvPicker.setVisible(false);
         }
@@ -161,29 +172,31 @@ public class ThemeEditorGUI extends GuiScreen {
         previewControls.render(mouseX, mouseY, partialTicks);
 
         int controlsBottom = previewControls.getY() + previewControls.getHeight();
-        int gap = 12;
-        previewAreaY = controlsBottom + gap;
-        previewAreaH = windowY + windowH - previewAreaY - 10;
+        int previewGap = 10;
+        previewAreaY = controlsBottom + previewGap;
+        previewAreaH = windowY + windowH - previewAreaY - MARGIN;
 
-        DrawHelper.drawBorderedRect(previewAreaX, previewAreaY, previewAreaX + previewAreaW, previewAreaY + previewAreaH, 1.0f, theme.getSeparatorColor(), theme.getContentBgColor());
-        mc.fontRenderer.drawStringWithShadow("Live Preview", previewAreaX + 4, previewAreaY - 10, 0xFFAAAAAA);
+        if (previewAreaH > 40) {
+            DrawHelper.drawBorderedRect(previewAreaX, previewAreaY, previewAreaX + previewAreaW, previewAreaY + previewAreaH, 1.0f, theme.getSeparatorColor(), theme.getContentBgColor());
+            mc.fontRenderer.drawStringWithShadow("Live Preview", previewAreaX + 4, previewAreaY - 10, 0xFFAAAAAA);
 
-        if (previewControls.showClickGUIPreview || previewControls.showChangelogPreview) {
-            int count = (previewControls.showClickGUIPreview ? 1 : 0) + (previewControls.showChangelogPreview ? 1 : 0);
-            int thumbGap = 8;
-            int pad = 6;
-            int availW = previewAreaW - pad * 2 - thumbGap * (count - 1);
-            int singleW = availW / count;
-            int singleH = previewAreaH - pad * 2;
-            int curX = previewAreaX + pad;
-            int curY = previewAreaY + pad;
+            if (previewControls.showClickGUIPreview || previewControls.showChangelogPreview) {
+                int count = (previewControls.showClickGUIPreview ? 1 : 0) + (previewControls.showChangelogPreview ? 1 : 0);
+                int thumbGap = 8;
+                int pad = 6;
+                int availW = previewAreaW - pad * 2 - thumbGap * (count - 1);
+                int singleW = availW / count;
+                int singleH = previewAreaH - pad * 2;
+                int curX = previewAreaX + pad;
+                int curY = previewAreaY + pad;
 
-            if (previewControls.showClickGUIPreview) {
-                guiPreviewRenderer.renderClickGUIThumbnail(curX, curY, singleW, singleH);
-                curX += singleW + thumbGap;
-            }
-            if (previewControls.showChangelogPreview) {
-                guiPreviewRenderer.renderChangelogThumbnail(curX, curY, singleW, singleH);
+                if (previewControls.showClickGUIPreview) {
+                    guiPreviewRenderer.renderClickGUIThumbnail(curX, curY, singleW, singleH);
+                    curX += singleW + thumbGap;
+                }
+                if (previewControls.showChangelogPreview) {
+                    guiPreviewRenderer.renderChangelogThumbnail(curX, curY, singleW, singleH);
+                }
             }
         }
 

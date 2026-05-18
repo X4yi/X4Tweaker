@@ -23,6 +23,10 @@ public class ContentPanel extends ScrollablePanel {
     private final List<ModuleRow> rows = new ArrayList<ModuleRow>();
     private ModuleRow hoveredRow = null;
 
+    private boolean draggingSlider = false;
+    private NumberSetting draggingSliderSetting = null;
+    private int draggingSliderX, draggingSliderW;
+
     public ContentPanel(ThemeBridge theme, Category initialCategory) {
         this.theme = theme;
         this.mc = Minecraft.getMinecraft();
@@ -150,7 +154,25 @@ public class ContentPanel extends ScrollablePanel {
 
     @Override
     public boolean onMouseRelease(int mouseX, int mouseY, int button) {
+        if (draggingSlider) {
+            draggingSlider = false;
+            draggingSliderSetting = null;
+            X4TweakerClient.getInstance().getConfigManager().save();
+            return true;
+        }
         return super.onMouseRelease(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean onMouseMove(int mouseX, int mouseY, int dx, int dy) {
+        if (draggingSlider && draggingSliderSetting != null) {
+            double ratio = MathHelper.clamp((double)(mouseX - draggingSliderX) / (double)draggingSliderW, 0.0, 1.0);
+            double newVal = draggingSliderSetting.getMin() + ratio * (draggingSliderSetting.getMax() - draggingSliderSetting.getMin());
+            double stepped = Math.round(newVal / draggingSliderSetting.getIncrement()) * draggingSliderSetting.getIncrement();
+            draggingSliderSetting.setValue(MathHelper.clamp(stepped, draggingSliderSetting.getMin(), draggingSliderSetting.getMax()));
+            return true;
+        }
+        return super.onMouseMove(mouseX, mouseY, dx, dy);
     }
 
     @Override
@@ -270,6 +292,10 @@ public class ContentPanel extends ScrollablePanel {
             double newVal = ns.getMin() + ratio * (ns.getMax() - ns.getMin());
             double stepped = Math.round(newVal / ns.getIncrement()) * ns.getIncrement();
             ns.setValue(MathHelper.clamp(stepped, ns.getMin(), ns.getMax()));
+            draggingSlider = true;
+            draggingSliderSetting = ns;
+            draggingSliderX = sx;
+            draggingSliderW = sw;
             return true;
         }
         if (s instanceof BooleanSetting) {

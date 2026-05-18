@@ -7,10 +7,10 @@ import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 
 public class HSVColorPicker implements GuiComponent {
-    private static final int SAT_VAL_SIZE = 120;
-    private static final int HUE_WHEEL_RADIUS = 36;
+    private static final int HUE_WHEEL_RADIUS = 42;
     private static final int ALPHA_BAR_W = 14;
     private static final int GAP = 8;
+    private static final int MIN_SAT_VAL = 80;
 
     private int x, y, width, height;
     private boolean visible = true;
@@ -25,14 +25,14 @@ public class HSVColorPicker implements GuiComponent {
     private boolean draggingAlphaBar = false;
     private Runnable onColorChanged;
 
-    private int satValX, satValY, hueWheelCx, hueWheelCy, alphaBarX, alphaBarY;
+    private int satValX, satValY, satValSize;
+    private int hueWheelCx, hueWheelCy;
+    private int alphaBarX, alphaBarY, alphaBarH;
     private int previewX, previewY, previewW, previewH;
 
     public HSVColorPicker(Runnable onColorChanged) {
         this.mc = Minecraft.getMinecraft();
         this.onColorChanged = onColorChanged;
-        this.width = SAT_VAL_SIZE + GAP + HUE_WHEEL_RADIUS * 2 + GAP + ALPHA_BAR_W;
-        this.height = Math.max(SAT_VAL_SIZE, HUE_WHEEL_RADIUS * 2);
     }
 
     public void setColor(int rgb) {
@@ -58,16 +58,21 @@ public class HSVColorPicker implements GuiComponent {
         if (!visible) return;
         int currentRgb = java.awt.Color.HSBtoRGB(hue, sat, val);
 
+        int availH = height - 26;
+        satValSize = Math.max(MIN_SAT_VAL, Math.min(availH, width - GAP - HUE_WHEEL_RADIUS * 2 - GAP - ALPHA_BAR_W));
+        satValSize = Math.min(satValSize, availH);
+
         satValX = x;
         satValY = y;
-        hueWheelCx = x + SAT_VAL_SIZE + GAP + HUE_WHEEL_RADIUS;
+        hueWheelCx = x + satValSize + GAP + HUE_WHEEL_RADIUS;
         hueWheelCy = y + HUE_WHEEL_RADIUS;
-        alphaBarX = x + SAT_VAL_SIZE + GAP + HUE_WHEEL_RADIUS * 2 + GAP;
-        alphaBarY = y + (SAT_VAL_SIZE - ALPHA_BAR_W) / 2;
+        alphaBarX = x + satValSize + GAP + HUE_WHEEL_RADIUS * 2 + GAP;
+        alphaBarY = y;
+        alphaBarH = satValSize;
 
-        DrawHelper.drawSatValSquare(satValX, satValY, SAT_VAL_SIZE, SAT_VAL_SIZE, hue);
-        int svPx = satValX + (int)(sat * SAT_VAL_SIZE);
-        int svPy = satValY + (int)((1.0f - val) * SAT_VAL_SIZE);
+        DrawHelper.drawSatValSquare(satValX, satValY, satValSize, satValSize, hue);
+        int svPx = satValX + (int)(sat * satValSize);
+        int svPy = satValY + (int)((1.0f - val) * satValSize);
         DrawHelper.drawBorderedRect(svPx - 2, svPy - 2, svPx + 2, svPy + 2, 1.0f, 0xFF000000, 0xFFFFFFFF);
 
         renderHueWheel(hueWheelCx, hueWheelCy, HUE_WHEEL_RADIUS);
@@ -77,12 +82,12 @@ public class HSVColorPicker implements GuiComponent {
         int hueCursorY = hueWheelCy + (int)(Math.sin(hueRad) * HUE_WHEEL_RADIUS);
         DrawHelper.drawBorderedRect(hueCursorX - 3, hueCursorY - 3, hueCursorX + 3, hueCursorY + 3, 1.0f, 0xFF000000, 0xFFFFFFFF);
 
-        DrawHelper.drawAlphaBar(alphaBarX, alphaBarY, ALPHA_BAR_W, SAT_VAL_SIZE, currentRgb);
+        DrawHelper.drawAlphaBar(alphaBarX, alphaBarY, ALPHA_BAR_W, alphaBarH, currentRgb);
         int ax = alphaBarX + (int)((alpha / 255f) * ALPHA_BAR_W);
-        DrawHelper.drawBorderedRect(ax - 2, alphaBarY - 1, ax + 2, alphaBarY + SAT_VAL_SIZE + 1, 1.0f, 0xFF000000, 0xFFFFFFFF);
+        DrawHelper.drawBorderedRect(ax - 2, alphaBarY - 1, ax + 2, alphaBarY + alphaBarH + 1, 1.0f, 0xFF000000, 0xFFFFFFFF);
 
         previewX = x;
-        previewY = y + SAT_VAL_SIZE + 6;
+        previewY = y + satValSize + 6;
         previewW = width;
         previewH = 16;
         DrawHelper.drawBorderedRect(previewX, previewY, previewX + previewW, previewY + previewH, 1.0f, 0xFF555555, getCurrentColor());
@@ -92,8 +97,8 @@ public class HSVColorPicker implements GuiComponent {
         mc.fontRenderer.drawStringWithShadow(rgbaStr, previewX, previewY + previewH + 4, 0xFFDDDDDD);
 
         if (draggingSatVal) {
-            sat = MathHelper.clamp((float)(mouseX - satValX) / (float)SAT_VAL_SIZE, 0.0f, 1.0f);
-            val = 1.0f - MathHelper.clamp((float)(mouseY - satValY) / (float)SAT_VAL_SIZE, 0.0f, 1.0f);
+            sat = MathHelper.clamp((float)(mouseX - satValX) / (float)satValSize, 0.0f, 1.0f);
+            val = 1.0f - MathHelper.clamp((float)(mouseY - satValY) / (float)satValSize, 0.0f, 1.0f);
             if (onColorChanged != null) onColorChanged.run();
         }
         if (draggingHueWheel) {
@@ -104,7 +109,7 @@ public class HSVColorPicker implements GuiComponent {
             if (onColorChanged != null) onColorChanged.run();
         }
         if (draggingAlphaBar) {
-            alpha = (int)(MathHelper.clamp((float)(mouseY - alphaBarY) / (float)SAT_VAL_SIZE, 0.0f, 1.0f) * 255);
+            alpha = (int)(MathHelper.clamp((float)(mouseY - alphaBarY) / (float)alphaBarH, 0.0f, 1.0f) * 255);
             if (onColorChanged != null) onColorChanged.run();
         }
     }
@@ -115,19 +120,27 @@ public class HSVColorPicker implements GuiComponent {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         net.minecraft.client.renderer.Tessellator tessellator = net.minecraft.client.renderer.Tessellator.getInstance();
         net.minecraft.client.renderer.BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(6, net.minecraft.client.renderer.vertex.DefaultVertexFormats.POSITION_COLOR);
+        buffer.begin(4, net.minecraft.client.renderer.vertex.DefaultVertexFormats.POSITION_COLOR);
         int segments = 72;
-        for (int i = 0; i <= segments; i++) {
-            double angle = Math.toRadians((i * 360.0 / segments) - 90);
-            float hueVal = i / (float) segments;
-            int color = java.awt.Color.HSBtoRGB(hueVal, 1.0f, 1.0f);
-            float r = (float)((color >> 16) & 0xFF) / 255.0f;
-            float g = (float)((color >> 8) & 0xFF) / 255.0f;
-            float b = (float)(color & 0xFF) / 255.0f;
-            if (i == 0) {
-                buffer.pos(cx, cy, 0.0).color(r, g, b, 1.0f).endVertex();
-            }
-            buffer.pos(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius, 0.0).color(r, g, b, 1.0f).endVertex();
+        for (int i = 0; i < segments; i++) {
+            double angle1 = Math.toRadians((i * 360.0 / segments) - 90);
+            double angle2 = Math.toRadians(((i + 1) * 360.0 / segments) - 90);
+            float hueVal1 = i / (float) segments;
+            float hueVal2 = (i + 1) / (float) segments;
+            int color1 = java.awt.Color.HSBtoRGB(hueVal1, 1.0f, 1.0f);
+            int color2 = java.awt.Color.HSBtoRGB(hueVal2, 1.0f, 1.0f);
+            float r1 = (float)((color1 >> 16) & 0xFF) / 255.0f;
+            float g1 = (float)((color1 >> 8) & 0xFF) / 255.0f;
+            float b1 = (float)(color1 & 0xFF) / 255.0f;
+            float r2 = (float)((color2 >> 16) & 0xFF) / 255.0f;
+            float g2 = (float)((color2 >> 8) & 0xFF) / 255.0f;
+            float b2 = (float)(color2 & 0xFF) / 255.0f;
+            float rc = (r1 + r2) * 0.5f;
+            float gc = (g1 + g2) * 0.5f;
+            float bc = (b1 + b2) * 0.5f;
+            buffer.pos(cx, cy, 0.0).color(rc, gc, bc, 1.0f).endVertex();
+            buffer.pos(cx + Math.cos(angle1) * radius, cy + Math.sin(angle1) * radius, 0.0).color(r1, g1, b1, 1.0f).endVertex();
+            buffer.pos(cx + Math.cos(angle2) * radius, cy + Math.sin(angle2) * radius, 0.0).color(r2, g2, b2, 1.0f).endVertex();
         }
         tessellator.draw();
         GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -141,11 +154,11 @@ public class HSVColorPicker implements GuiComponent {
             draggingHueWheel = true;
             return true;
         }
-        if (mouseX >= satValX && mouseX <= satValX + SAT_VAL_SIZE && mouseY >= satValY && mouseY <= satValY + SAT_VAL_SIZE) {
+        if (mouseX >= satValX && mouseX <= satValX + satValSize && mouseY >= satValY && mouseY <= satValY + satValSize) {
             draggingSatVal = true;
             return true;
         }
-        if (mouseX >= alphaBarX && mouseX <= alphaBarX + ALPHA_BAR_W && mouseY >= alphaBarY && mouseY <= alphaBarY + SAT_VAL_SIZE) {
+        if (mouseX >= alphaBarX && mouseX <= alphaBarX + ALPHA_BAR_W && mouseY >= alphaBarY && mouseY <= alphaBarY + alphaBarH) {
             draggingAlphaBar = true;
             return true;
         }
@@ -172,6 +185,8 @@ public class HSVColorPicker implements GuiComponent {
     public void setBounds(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
+        this.width = width;
+        this.height = height;
     }
 
     @Override
